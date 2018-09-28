@@ -1,4 +1,4 @@
-.idea/
+# .idea/
 conf19/config/__pycache__/
 conf19/config/settings/__pycache__/
 conf19/config/settings/secrets.json
