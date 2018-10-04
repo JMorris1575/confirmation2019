@@ -4,9 +4,22 @@
 
 .navbar a {
     color: #ffdd55;
+    text-decoration: none;
 }
 
 .navbar h3 {
     font-family: 'Gloria Hallelujah', cursive;
+}
+
+.navbar img {
+    vertical-align: top;
+}
+
+.navbar li, span {
+    color: #ffdd55;
+}
+
+.navbar ul {
+    justify-content: flex-end;
 }
 
