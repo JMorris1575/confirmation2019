@@ -5,7 +5,7 @@ from django.utils import timezone
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField('date published', default=timezone.now())
 
     def __str__(self):
         return self.question_text
@@ -26,3 +26,6 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice_text
+
+    class Meta:
+        order_with_respect_to = 'question'
