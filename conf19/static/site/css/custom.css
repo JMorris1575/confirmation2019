@@ -1,25 +1,26 @@
-.navbar {
+header, footer {
     background: #d40000;
+    color: #ffdd55;
 }
 
-.navbar a {
+header a {
     color: #ffdd55;
     text-decoration: none;
 }
 
-.navbar h3 {
+header h3 {
     font-family: 'Gloria Hallelujah', cursive;
 }
 
-.navbar img {
+header img {
     vertical-align: top;
 }
 
-.navbar li, span {
+header li, span {
     color: #ffdd55;
 }
 
-.navbar ul {
+header ul {
     justify-content: flex-end;
 }
 

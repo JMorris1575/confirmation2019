@@ -2,35 +2,53 @@
 
 {% block header %}
 
-    <nav class="navbar navbar-expand-sm navbar-dark">
+    <header>
         <div class="container">
             <div class="row">
-                <div class="col-sm-10">
-                    <a href="#" class="brand">
-                        <img src="{% static 'images/HolySpiritLogo.png' %}" class="d-none d-md-inline">
-                        <h3 class="d-inline">St. Basil Confirmation</h3>
+                <div class="col-sm-3 d-none d-sm-inline">
+                    <a href="{% url 'polls:index' %}" class="brand">
+                        <img src="{% static 'images/HolySpiritLogo.png' %}" class="img-fluid">
                     </a>
                 </div>
-                <div class="col-sm-2">
-                    <button class="navbar-toggler collapsed btn btn-outline" data-toggle="collapse" data-target="#navbarCollapse">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarCollapse">
-                        <ul class="navbar-nav ml-auto">
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">Extra</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">Polls</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">Help</a>
-                            </li>
-                        </ul>
+                <div class="col">
+                    <div class="row">
+                        <div class="col-7">
+                            <a href="{% url 'polls:index' %}">
+                                <h3 class="d-inline">St. Basil Confirmation</h3>
+                            </a>
+                        </div>
+                        <div class="col-5 text-right">
+                            {% if user.is_authenticated %}
+                                <h4>Welcome {{ user.first_name }}!</h4>
+                                <a class="link" href="{% url 'user:logout' %}?next={{ request.path_info }}"> Logout</a>
+                            {% else %}
+                                <h4>Welcome!</h4>
+                                <a class="link" href="{% url 'user:login' %}?next={{ request.path_info }}"> Login</a>
+                            {% endif %}
+                        </div>
                     </div>
+                    <nav class="row navbar navbar-expand-sm">
+                        <button class="navbar-toggler collapsed btn btn-outline"
+                                data-toggle="collapse" data-target="#navbarCollapse">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarCollapse">
+                            <ul class="navbar-nav ml-auto">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Extra</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Polls</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">Help</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
 {% endblock %}

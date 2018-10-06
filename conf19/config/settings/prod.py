@@ -18,7 +18,7 @@ DATABASES = {
 # https://docs.djangoproject.com/en/2.01/howto/static-files/
 
 STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'conftest_static/')
-STATIC_URL = 'http://conftest.jmorris.webfactional.com/static/'
+STATIC_URL = 'https://conftest.jmorris.webfactional.com/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static', 'site'), )
 
 ALLOWED_HOSTS.append('conftest.jmorris.webfactional.com')
