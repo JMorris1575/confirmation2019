@@ -24,3 +24,31 @@ header ul {
     justify-content: flex-end;
 }
 
+.bg-primary, .btn-primary {
+    background: #2eb873 !important;
+    color: #fff;
+    border-color: #2eb873 !important;
+}
+
+.btn-primary:hover {
+    background: #0e9853 !important;
+    color: #fff;
+    border-color: #0e9853 !important;
+}
+
+.btn-outline-primary {
+    background: #fff;
+    border-color: #2eb873;
+    color: #2eb873;
+}
+
+.btn-outline-primary:hover {
+    background: #2eb873;
+    color: #fff;
+    border-color: #2eb873;
+}
+
+.text-primary {
+    color: #2eb873 !important;
+}
+
