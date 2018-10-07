@@ -24,6 +24,11 @@ header ul {
     justify-content: flex-end;
 }
 
+header button span {
+    border: 1px solid #ffdd55;
+    border-radius: 5px;
+}
+
 .bg-primary, .btn-primary {
     background: #2eb873 !important;
     color: #fff;

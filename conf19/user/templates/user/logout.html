@@ -2,10 +2,12 @@
 
 {% block content %}
 
-    <h1>You have succesfully logged out of the St. Basil Confirmation Website</h1>
+    <h3 class="text-center text-primary mt-3">You have succesfully logged out of the St. Basil Confirmation Website</h3>
 
-    <p>
-        <a href="{% url 'login' %}">Log Back In.</a>
-    </p>
+    <div class="row">
+        <span class="mx-auto">
+            <a href="{% url 'user:login' %}" type="button" class="btn btn-outline-primary mx-auto my-3">Log Back In.</a>
+        </span>
+    </div>
 
 {% endblock %}

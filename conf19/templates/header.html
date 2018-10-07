@@ -19,21 +19,23 @@
                         </div>
                         <div class="col-5 text-right">
                             {% if user.is_authenticated %}
-                                <h4>Welcome {{ user.first_name }}!</h4>
-                                <a class="link" href="{% url 'user:logout' %}?next={{ request.path_info }}"> Logout</a>
+                                <h5>Welcome {{ user.first_name }}!</h5>
+                                <a class="link" href="{% url 'user:logout' %}"> Logout</a>
                             {% else %}
                                 <h4>Welcome!</h4>
                                 <a class="link" href="{% url 'user:login' %}?next={{ request.path_info }}"> Login</a>
                             {% endif %}
                         </div>
                     </div>
-                    <nav class="navbar navbar-dark navbar-expand-md">
-                        <button class="navbar-toggler ml-auto" type="button"
+                    <nav class="row navbar navbar-dark navbar-expand-md">
+                        <button class="navbar-toggler ml-auto px-0" type="button"
                                 data-toggle="collapse" data-target="#navbarCollapse">
-                            <span class="navbar-toggler-icon"></span>
+                            <span class="navbar-toggler-icon pt-1" style="background:none">
+                                <i class="fas fa-bars"></i>
+                            </span>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarCollapse">
-                            <ul class="navbar-nav ml-auto">
+                            <ul class="navbar-nav ml-auto text-right">
                                 <li class="nav-item">
                                     <a href="#" class="nav-link">Extra</a>
                                 </li>
