@@ -18,7 +18,8 @@
 <h3 class="text-center text-primary mt-3">Welcome to the St. Basil Confirmation Website!</h3>
 <p class="lead text-center text-primary">Enter the Username and Password you were given. Both are case-sensitive.</p>
 <div class="row">
-    <div class="col-6 mx-auto">
+    <div class="col"></div>
+    <div class="col-12 col-md-8">
         <form method="post" action="{% url 'user:login' %}">
             {% csrf_token %}
             <div class="input-group input-group-lg my-3">
@@ -41,6 +42,7 @@
             <input type="hidden" name="next" value="{{ next }}">
         </form>
     </div>
+    <div class="col"></div>
 </div>
 
 
