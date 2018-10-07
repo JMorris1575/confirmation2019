@@ -19,11 +19,11 @@
                         </div>
                         <div class="col-5 text-right">
                             {% if user.is_authenticated %}
-                                <h5>Welcome {{ user.first_name }}!</h5>
-                                <a class="link" href="{% url 'user:logout' %}"> Logout</a>
+                                <span class="h5">Welcome {{ user.first_name }}!</span>
+                                <a class="link" href="{% url 'user:logout' %}">  (Logout)</a>
                             {% else %}
-                                <h4>Welcome!</h4>
-                                <a class="link" href="{% url 'user:login' %}?next={{ request.path_info }}"> Login</a>
+                                <span class="h5">Welcome!</span>
+                                <a class="link" href="{% url 'user:login' %}?next={{ request.path_info }}">  (Login)</a>
                             {% endif %}
                         </div>
                     </div>
