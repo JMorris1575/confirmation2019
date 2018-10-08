@@ -5,19 +5,21 @@
     <header>
         <div class="container">
             <div class="row">
-                <div class="col-sm-2 d-none d-sm-inline">
+                <div class="col-md-2 d-none d-md-inline">
                     <a href="{% url 'polls:index' %}" class="brand">
                         <img src="{% static 'images/HolySpiritLogo.png' %}" class="img-fluid">
                     </a>
                 </div>
                 <div class="col">
                     <div class="row">
-                        <div class="col-7">
+                        <div class="col">
                             <a href="{% url 'polls:index' %}">
-                                <h3 class="d-inline">St. Basil Confirmation</h3>
+                                <h2 class="header-text d-inline">St. Basil Confirmation</h2>
                             </a>
                         </div>
-                        <div class="col-5 text-right">
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col">
                             {% if user.is_authenticated %}
                                 <span class="h5">Welcome {{ user.first_name }}!</span>
                                 <a class="link" href="{% url 'user:logout' %}">  (Logout)</a>
@@ -26,28 +28,30 @@
                                 <a class="link" href="{% url 'user:login' %}?next={{ request.path_info }}">  (Login)</a>
                             {% endif %}
                         </div>
-                    </div>
-                    <nav class="row navbar navbar-dark navbar-expand-md">
-                        <button class="navbar-toggler ml-auto px-0" type="button"
-                                data-toggle="collapse" data-target="#navbarCollapse">
-                            <span class="navbar-toggler-icon pt-1" style="background:none">
-                                <i class="fas fa-bars"></i>
-                            </span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbarCollapse">
-                            <ul class="navbar-nav ml-auto text-right">
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Extra</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">Polls</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link pr-0">Help</a>
-                                </li>
-                            </ul>
+                        <div class="col">
+                            <nav class="navbar navbar-dark navbar-expand-md">
+                                <button class="navbar-toggler ml-auto px-0" type="button"
+                                        data-toggle="collapse" data-target="#navbarCollapse">
+                                    <span class="navbar-toggler-icon pt-1" style="background:none">
+                                        <i class="fas fa-bars"></i>
+                                    </span>
+                                </button>
+                                <div class="collapse navbar-collapse" id="navbarCollapse">
+                                    <ul class="navbar-nav ml-auto text-right">
+                                        <li class="nav-item">
+                                            <a href="#" class="nav-link">Extra</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="#" class="nav-link">Polls</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="#" class="nav-link pr-0">Help</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </nav>
                         </div>
-                    </nav>
+                    </div>
                 </div>
             </div>
         </div>

@@ -4,16 +4,22 @@ header, footer {
 }
 
 header a {
-    color: #ffdd55;
+    color: rgba(255, 221, 85, 0.8);
     text-decoration: none;
 }
 
-header h3 {
-    font-family: 'Gloria Hallelujah', cursive;
+header a:hover {
+    color: rgba(255, 221, 85, 1.0);
+    text-decoration: none;
 }
 
 header img {
     vertical-align: top;
+    opacity: 0.8;
+}
+
+header img:hover {
+    opacity: 1.0;
 }
 
 header li, span {
@@ -51,6 +57,10 @@ header button span {
     background: #2eb873;
     color: #fff;
     border-color: #2eb873;
+}
+
+.header-text {
+    font-family: 'Gloria Hallelujah', cursive;
 }
 
 .text-primary {
