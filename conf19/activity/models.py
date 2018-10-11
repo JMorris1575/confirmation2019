@@ -23,8 +23,12 @@ class Activity(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['index']
+        verbose_name_plural = 'activities'
 
-class Page(models.Model):
+
+class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField(unique=True)
     title = models.CharField(max_length=40)
@@ -32,18 +36,28 @@ class Page(models.Model):
     def __str__(self):
         return self.activity.slug + ': ' + str(self.index) + '. ' + str(self.title)
 
+    class Meta:
+        ordering = ['index']
 
-class Multi_Choice(Page):
+
+class MultiChoice(models.Model):
     text = models.CharField(max_length=512)
 
     def __str__(self):
         return Truncator(self.text).words(5)
 
+    class Meta:
+        verbose_name_plural = 'multiple choice items'
+
+
 class Choice(models.Model):
-    multi_choice = models.ForeignKey(Multi_Choice, on_delete=models.CASCADE)
+    multi_choice = models.ForeignKey(MultiChoice, on_delete=models.CASCADE)
     index = models.SmallIntegerField(unique=True)
     text = models.CharField(max_length=256)
     correct = models.BooleanField(blank=True)
 
     def __str__(self):
         return self.multi_choice + 'Choice #' + self.index + ' ' + self.text
+
+    class Meta:
+        ordering = ['index']

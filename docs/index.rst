@@ -12,6 +12,7 @@ Welcome to Confirmation 2019's documentation!
    :numbered:
 
    design
+   problems
 
 
 
