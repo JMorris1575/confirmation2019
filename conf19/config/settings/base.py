@@ -134,4 +134,4 @@ USE_TZ = True
 
 LOGIN_URL = reverse_lazy('user:login')
 LOGOUT_URL = reverse_lazy('user:logout')
-LOGIN_REDIRECT_URL = reverse_lazy('polls:index')
+LOGIN_REDIRECT_URL = reverse_lazy('activity:welcome')

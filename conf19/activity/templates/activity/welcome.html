@@ -1,0 +1,51 @@
+{% extends parent_template|default:"base.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron my-3">
+            <h1 class="text-center">Welcome to the St. Basil Confirmation Website!</h1>
+            <hr class="my=3">
+            <p class="lead text-center">We hope the activities here will
+                be helpful, informative, and not incredibly boring. Let us know how we do on all three.</p>
+        </div>
+        {% if data %}
+            <div class="row">
+                <div class="col-md-8 mx-auto p-0">
+                    <div class="card mb-3">
+                        <h5 class="card-header text-center">Activities</h5>
+                        <div class="card-body px-1">
+                            <p class="card-title text-center">Click a button to start, continue, or review an activity.</p>
+                            <hr class="my-1"></hr>
+                            <ul class="card-text pl-0">
+                                {% for activity, msg in data %}
+                                    <li class="row mx-0">
+                                        <div class="col-5 p-1">
+                                            {{ forloop.counter }}. {{ activity }}
+                                        </div>
+                                        <div class="col-4 p-1">
+                                            {{ msg }}
+                                        </div>
+                                        <div class="col-3 p-1">
+                                            <a class="btn btn-outline-primary btn-block" href="/activity/{{ activity.slug }}/summary/">
+                                                {% if msg == '0.0% Complete' %}
+                                                    Start
+                                                {% elif msg == 'Finished!' %}
+                                                    Done!
+                                                {% else %}
+                                                    Go On
+                                                 {% endif %}
+                                            </a>
+                                        </div>
+                                    </li>
+                                <hr class="my-1">
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

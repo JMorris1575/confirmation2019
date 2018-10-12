@@ -1,6 +1,24 @@
 from django.db import models
+from django.conf import settings
 from django.utils.text import Truncator
 
+from heapq import merge
+
+
+def get_items(activity):
+    """
+    Returns a sorted QuerySet of all the items of various sorts included in activity
+    :param activity: the activity whose items are to be found
+    :return: a QuerySet of all items sorted according to their index
+    """
+    def get_index(x):
+        return x.index
+
+    mc = activity.multichoice_set.all()
+    mc_list = list(mc)
+    tf = activity.truefalse_set.all()
+    tf_list = list(tf)
+    return list(merge(mc_list, tf_list, key=get_index))
 
 class Image(models.Model):
     filename = models.CharField(max_length=30)
@@ -31,33 +49,96 @@ class Activity(models.Model):
 class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField(unique=True)
-    title = models.CharField(max_length=40)
 
     def __str__(self):
-        return self.activity.slug + ': ' + str(self.index) + '. ' + str(self.title)
+        return self.activity.slug + ': ' + str(self.index)
 
     class Meta:
         ordering = ['index']
+        abstract = True
 
 
-class MultiChoice(models.Model):
+class MultiChoice(Item):
     text = models.CharField(max_length=512)
 
     def __str__(self):
         return Truncator(self.text).words(5)
 
     class Meta:
-        verbose_name_plural = 'multiple choice items'
+        verbose_name = 'multiple choice item'
+        ordering = ['index']
 
 
 class Choice(models.Model):
     multi_choice = models.ForeignKey(MultiChoice, on_delete=models.CASCADE)
-    index = models.SmallIntegerField(unique=True)
     text = models.CharField(max_length=256)
     correct = models.BooleanField(blank=True)
 
     def __str__(self):
-        return self.multi_choice + 'Choice #' + self.index + ' ' + self.text
+        return self.text
 
     class Meta:
+        ordering = ['pk']
+
+class TrueFalse(Item):
+    statement = models.CharField(max_length=512)
+    correct_answer = models.BooleanField(null=True, blank=True)
+
+    def __str__(self):
+        return self.statement
+
+    class Meta:
+        verbose_name = 'True or false item'
         ordering = ['index']
+
+
+class Response(models.Model):
+    """
+    Records the user's responses for the various kinds of items and keeps track of which items have been completed.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
+    index = models.SmallIntegerField()      # indicates which item in the activity received this response
+    # item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    last_edited = models.DateTimeField(auto_now=True)
+    # essay = models.TextField(blank=True)
+    multi_choice = models.PositiveSmallIntegerField(null=True, blank=True)
+    true_false = models.BooleanField(default=False)
+    correct = models.NullBooleanField(null=True)
+    completed = models.BooleanField(default=False)
+
+    class Meta():
+        ordering = ['created']
+
+    def __str__(self):
+        name = self.user.first_name + ' ' + self.user.last_name
+        if name[-1] == 's':
+            possessive_ending = "'"
+        else:
+            possessive_ending = "'s"
+        return name + possessive_ending + ' response to ' + str(self.page)
+
+    def is_correct(self):
+        return self.correct
+
+    # def can_delete(self):
+    #     """
+    #     Returns True if this response can be deleted, false otherwise
+    #     A response can be deleted if it's answer has not been revealed and if the user has not completed any pages
+    #     beyond this one in the current activity
+    #     :return: boolean
+    #     """
+    #     this_index = self.page.index
+    #     number_completed = len(Response.objects.filter(user=self.user, activity=self.activity))
+    #     if (this_index == number_completed) and not self.page.reveal_answer:
+    #         return True
+    #     else:
+    #         return False
+
+    def can_goto_next(self):
+        """
+        Returns true if this user has completed this page and so can go to the next
+        :return: boolean
+        """
+        return self.completed

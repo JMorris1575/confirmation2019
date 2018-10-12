@@ -98,3 +98,115 @@ correct, a boolean field indicating whether this is the correct response or null
 #. text, a long CharField (512 characters) with the statement to be evaluated
 #. correct, a boolean field giving the correct response if any
 
+Remembering User Responses
+--------------------------
+
+Last year I used the Responses model as defined below::
+
+    class Response(models.Model):
+        user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+        activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
+        page = models.ForeignKey(Page, on_delete=models.CASCADE)
+        created = models.DateTimeField(auto_now_add=True)
+        last_edited = models.DateTimeField(auto_now=True)
+        essay = models.TextField(blank=True)
+        multi_choice = models.PositiveSmallIntegerField(null=True, blank=True)
+        true_false = models.BooleanField(default=False)
+        correct = models.NullBooleanField(null=True)
+        completed = models.BooleanField(default=False)
+
+        class Meta():
+            ordering = ['created']
+
+        def __str__(self):
+            name = self.user.first_name + ' ' + self.user.last_name
+            if name[-1] == 's':
+                possessive_ending = "'"
+            else:
+                possessive_ending = "'s"
+            return name + possessive_ending + ' response to ' + str(self.page)
+
+        def is_correct(self):
+            return self.correct
+
+        def can_delete(self):
+            """
+            Returns True if this response can be deleted, false otherwise
+            A response can be deleted if it's answer has not been revealed and if the user has not completed any pages
+            beyond this one in the current activity
+            :return: boolean
+            """
+            this_index = self.page.index
+            number_completed = len(Response.objects.filter(user=self.user, activity=self.activity))
+            if (this_index == number_completed) and not self.page.reveal_answer:
+                return True
+            else:
+                return False
+
+        def can_goto_next(self):
+            """
+            Returns true if this user has completed this page and so can go to the next
+            :return: boolean
+            """
+            return self.completed
+
+        def user_choice(self):
+            return Choice.objects.get(page=self.page, index=int(self.multi_choice))
+
+This cannot be used as such this year as long as my ``Item`` class (the replacement for ``Page``) is an abstract class.
+Abstract classes cannot be used as foriegn keys. It seems I should, however, be able to save the index each item has in
+the activity (``activity`` and ``index`` should probably be defined as ``unique_together`` by the way) and use that to
+find the appropriate item whether it be a MultiChoice, TrueFalse, or other sorts of items to be defined later.
+
+Getting All of an Activity's Items
+----------------------------------
+
+But thinking about that raised another question in my mind. If each sort of item is to be in a separate model how are
+the templates and any methods that need to locate them going to know which kind of item to locate. Should I have an
+additional field in the ``Item`` class for that? It could use the same ``choices`` field option that I did last year.
+
+But that begs the question. I would have to select, or set as a constant, an ``item_type`` in each model but I wouldn't
+be able to check that field until I had already retrieved that item. There must be some sort of way I can collect all
+of the items that go with an activity and present them in a sorted list or query_set...
+
+I think I will create the TrueFalse model and practice in the shell.
+
+...
+
+After creating the TrueFalse model, some practice, reading the Djago docs about filters, and some more thought, I think
+it will work to create a global method in ``activity.models.py`` to return a sorted list of items for a given activity.
+I'm not sure how it will get sorted but I'll play with it for a while in the shell to figure it out.
+
+...
+
+It turned out to be quite simple, but it took a lot of experimentation and study to figure it out. It turns out there is
+an import from Python that does the main part of the work::
+
+    def get_items(activity):
+        """
+        Returns a sorted QuerySet of all the items of various sorts included in activity
+        :param activity: the activity whose items are to be found
+        :return: a QuerySet of all items sorted according to their index
+        """
+        def get_index(x):
+            return x.index
+
+        mc = activity.multichoice_set.all()
+        mc_list = list(mc)
+        tf = activity.truefalse_set.all()
+        tf_list = list(tf)
+        return list(merge(mc_list, tf_list, key=get_index))
+
+To use it within the model class just write code such as the following::
+
+    activity = Activity.objects.get(pk=15)
+    item_list = get_items(activity)
+
+To use it in views I imagine there will have to be an import line such as::
+
+    from activity.models import get_items
+
+Or I could just import everything::
+
+    from activity.models import *
+
