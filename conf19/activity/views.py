@@ -30,4 +30,28 @@ class WelcomeView(View):
                       {'data': data})
 
 
+class SummaryView(View):
+    template_name = 'activity/summary.html'
+
+    def get(self, request, activity_slug):
+        activity = Activity.objects.get(slug=activity_slug)
+        items = get_items(activity)
+        responses = Response.objects.filter(user=request.user, activity=activity.pk)
+        data = []
+        first_pass = True                          # this changes as soon as an incomplete page is found
+        for item in items:
+            if responses.filter(index=item.index) and first_pass:
+                data.append((item, 'Completed'))    # If user has a response, call the page complete
+            elif first_pass:
+                data.append((item, 'Up next...'))   # This is the next page to do
+                first_pass = False                  # after that, enter 'Pending' for the rest of the pages
+            else:
+                data.append((item, 'Pending'))
+        return render(request, self.template_name, {'activity': activity,
+                                                    'data': data,})
+
+
+
+
+
 
