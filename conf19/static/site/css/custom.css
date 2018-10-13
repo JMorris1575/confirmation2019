@@ -47,6 +47,18 @@ header button span {
     border-color: #0e9853 !important;
 }
 
+.btn-primary.focus, .btn-primary:focus {
+    box-shadow: 0 0 0 .2rem rgba(46, 184, 115, 0.5) !important;
+}
+
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled) .active,
+ .btn-primary:not(:disabled):not(.disabled) .active .focus{
+    background: #0e9853 !important;
+    border-color: #2eb873 !important;
+}
+
 .btn-outline-primary {
     background: #fff;
     border-color: #2eb873;
@@ -57,6 +69,18 @@ header button span {
     background: #2eb873;
     color: #fff;
     border-color: #2eb873;
+}
+
+.btn-outline-primary.focus, .btn-outline-primary:focus {
+    box-shadow: 0 0 0 .2rem rgba(46, 184, 115, 0.5);
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active,
+ .btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+ .btn-outline-primary:not(:disabled):not(.disabled).active
+ .btn-outline-primary:not(:disabled):not(.disabled).active:focus{
+    background: #0e9853 !important;
+    border-color: #2eb873 !important;
 }
 
 .header-text {
