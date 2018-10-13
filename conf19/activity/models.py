@@ -49,6 +49,7 @@ class Activity(models.Model):
 class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField(unique=True)
+    title = models.CharField(max_length=25, null=True, blank=True)
 
     def __str__(self):
         return self.activity.slug + ': ' + str(self.index)

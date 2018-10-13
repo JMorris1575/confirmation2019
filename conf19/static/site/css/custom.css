@@ -22,7 +22,7 @@ header img:hover {
     opacity: 1.0;
 }
 
-header li, span {
+header li span {
     color: #ffdd55;
 }
 
