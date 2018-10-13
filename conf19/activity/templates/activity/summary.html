@@ -2,78 +2,68 @@
 {% load static %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-md-10 mx-auto">
-                <div class="card my-3">
-                    <h5 class="card-header text-center bg-primary">{{ activity }}</h5>
-                    <div class="card-body text-primary px-1">
-                        <div class="row">
-                            <div class="col-2">
-                                <img src="{% static 'activity/images/' %}{{ activity.image }}" />
-                            </div>
-                            <div class="col-10">
-                                <p class="card-title lead">{{ activity.overview }}</p>
-                            </div>
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card my-3">
+                <h5 class="card-header text-center bg-primary">{{ activity }}</h5>
+                <div class="card-body text-primary px-1">
+                    <div class="row">
+                        <div class="col-2">
+                            <img src="{% static 'activity/images/' %}{{ activity.image }}" />
+                        </div>
+                        <div class="col-10">
+                            <p class="card-title lead">{{ activity.overview }}</p>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="page-text row">
-                <div class="four columns">
-                    <img class="page-image" src="{% static 'images/illustrations/' %}{{ activity.image }}" />
-                </div>
-            </div>
-            <div class="row">
-                {% if data %}
-                    <div class="heading twelve columns">
-                        Things to Do:
-                    </div>
-                    <ul class="u-full-width">
-                        {% for page, progress in data %}
-                        <li class="row table-list separator">
-                            {% if progress == 'Pending' %}
-                                <div class="six columns">
-                                    {{ page.index }}. {{ page.title }}
-                                </div>
-                                <div class="three columns">
-                                    Pending
-                                </div>
-                                <div class="three columns">
-                                    <p class="center-element"></p>
-                                </div>
-                            {% else %}
-                                <div class="six columns">
-                                    {{ page.index }}. {{ page.title }}
-                                </div>
-                                <div class="three columns">
-                                    {{ progress }}
-                                </div>
-                                <div class="three columns">    <!-- Third Column -->
-                                    {% if progress == 'Pending' %}
-                                        ''
-                                    {% elif progress == 'Up next...' %}
-                                        <a class="button button u-full-width"
-                                           href="/activity/{{ activity.slug }}/{{ page.index }}/">
-                                            Do it...
-                                        </a>
-                                    {% else %}
-                                        <a class="button button u-full-width"
-                                           href="/activity/{{ activity.slug }}/{{ page.index }}/">
-                                            See it...
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                <a class="button offset-by-three six columns" href="/activity/welcome/">
-                    Return to Welcome Page
-                </a>
+                    <hr class="my-1">
+                    {% if data %}
+                        <h5>Things to Do:</h5>
+                            <ul class="card-text">
+                                {% for item, progress in data %}
+                                    <li class="row">
+                                        {% if progress == 'Pending' %}
+                                            <div class="col bg-danger">
+                                                {{ item.index }}. {{ item.title }}
+                                            </div>
+                                            <div class="col bg-warning">
+                                                Pending
+                                            </div>
+                                            <div class="col bg-success">
+                                                <p class="text-center"></p>
+                                            </div>
+                                        {% else %}
+                                            <div class="col bg-danger">
+                                                {{ item.index }}. {{ item.title }}
+                                            </div>
+                                            <div class="col bg-warning">
+                                                {{ progress }}
+                                            </div>
+                                            <div class="col bg-success">    <!-- Third Column -->
+                                                {% if progress == 'Pending' %}
+                                                    ''
+                                                {% elif progress == 'Up next...' %}
+                                                    <a class="btn btn-outline-primary btn-block"
+                                                       href="/activity/{{ activity.slug }}/{{ page.index }}/">
+                                                        Do it...
+                                                    </a>
+                                                {% else %}
+                                                    <a class="btn btn-outline-primary btn-block"
+                                                       href="/activity/{{ activity.slug }}/{{ page.index }}/">
+                                                        See it...
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
             </div>
         </div>
     </div>
+    <a class="button offset-by-three six columns" href="/activity/welcome/">
+        Return to Welcome Page
+    </a>
 
 {% endblock %}
