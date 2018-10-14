@@ -1,0 +1,30 @@
+{% extends parent_template|default:"base.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-10 mx-auto">
+            <div class="row">
+                <div class="col-8">
+                    <p class="heading">
+                        {{ activity }}
+                    </p>
+                    <p class="sub-heading">
+                        {{ page.title }}
+                    </p>
+                </div>
+                <div class="col-4">
+                    <img class="" src="{% static 'activity/images/' %}{{ activity.image }}" />
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="row">
+                <p class="block">
+                    {{ item.text }}
+                </p>
+            </div>
+            {% block item-content %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

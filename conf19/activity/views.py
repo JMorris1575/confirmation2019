@@ -3,7 +3,7 @@ from django.views import View
 
 import datetime
 
-from .models import Activity, Response, get_items
+from .models import Activity, MultiChoice, Response, get_items
 
 class WelcomeView(View):
     template_name = 'activity/welcome.html'
@@ -49,6 +49,30 @@ class SummaryView(View):
                 data.append((item, 'Pending'))
         return render(request, self.template_name, {'activity': activity,
                                                     'data': data,})
+
+
+class ItemView(View):
+
+    def get(self, request, activity_slug, item_index):
+        activity = Activity.objects.get(slug=activity_slug)
+        items = get_items(activity)
+        item = items[item_index]
+        responses = Response.objects.filter(user=request.user, activity=activity, index=item.index)
+        response = None
+        if len(responses) == 1:
+            response = responses[0]
+        if type(item) == MultiChoice:
+            self.template_name = 'activity/multi-choice.html'
+            choices = item.choice_set.all()
+            context = {'user': request.user, 'activity': activity, 'response': response, 'item': item, 'choices': choices}
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, activity_slug, item_index):
+        pass
+
+
+
 
 
 

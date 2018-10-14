@@ -1,0 +1,31 @@
+{% extends parent_template|default:"activity/base-activity.html" %}
+
+{% block title %}
+    {{ block.super }}|Multi-Choice Response
+{% endblock %}
+
+{% block item-content %}
+    {% if not response %}
+        <form class="row" action="{% url 'activity:item' activity.slug item.index %}" method="post">
+            {% csrf_token %}
+            {% if error_message %}
+                <div class="text-danger">
+                    <p>{{ error_message }}</p>
+                    {% for choice in choices %}
+                        <p class="">
+                            <input type="radio" name="choice" value="{{ choice.index }}">  {{ choice }}</input>
+                        </p>
+                    {% endfor %}
+                    <input class="offset-by-four four columns button-primary" value="Submit" type="submit"/>
+                </div>
+            {% else %}
+                {% for choice in choices %}
+                    <p class="offset-by-one eleven columns">
+                        <input type="radio" name="choice" value="{{ choice.index }}">  {{ choice }}</input>
+                    </p>
+                {% endfor %}
+                <input class="offset-by-four four columns button-primary" value="Submit" type="submit"/>
+            {% endif %}
+        </form>
+    {% endif %}
+{% endblock %}
