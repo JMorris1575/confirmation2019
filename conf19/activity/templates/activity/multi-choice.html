@@ -6,26 +6,23 @@
 
 {% block item-content %}
     {% if not response %}
-        <form class="row" action="{% url 'activity:item' activity.slug item.index %}" method="post">
+        <form action="{% url 'activity:item' item.activity.slug item.index %}" method="post">
             {% csrf_token %}
             {% if error_message %}
-                <div class="text-danger">
-                    <p>{{ error_message }}</p>
-                    {% for choice in choices %}
-                        <p class="">
-                            <input type="radio" name="choice" value="{{ choice.index }}">  {{ choice }}</input>
-                        </p>
-                    {% endfor %}
-                    <input class="offset-by-four four columns button-primary" value="Submit" type="submit"/>
-                </div>
-            {% else %}
-                {% for choice in choices %}
-                    <p class="offset-by-one eleven columns">
-                        <input type="radio" name="choice" value="{{ choice.index }}">  {{ choice }}</input>
-                    </p>
-                {% endfor %}
-                <input class="offset-by-four four columns button-primary" value="Submit" type="submit"/>
+                <h3 class="text-danger">{{ error_message }}</h3>
             {% endif %}
+            {% for choice in choices %}
+                <div class="form-check ml-3 ml-sm-5 my-4">
+                    <h4>
+                        <input class="form-check-input mt-2" type="radio" name="choice" value="{{ choice }}" id="radio{{ forloop.counter }}">
+                        <label class="form-check-label" for="radio{{ forloop.counter }}">{{ choice }}</label>
+                    </h4>
+                </div>
+            {% endfor %}
+            <div class=" row justify-content-center">
+                <input class="btn btn-outline-primary btn-lg" value="Submit Response" type="submit"/>
+            </div>
+
         </form>
     {% endif %}
 {% endblock %}

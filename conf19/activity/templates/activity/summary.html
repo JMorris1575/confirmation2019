@@ -4,14 +4,14 @@
 {% block content %}
     <div class="row">
         <div class="col-md-10 mx-auto">
-            <div class="card my-3">
+            <div class="card my-3 shadow p-3 bg-white rounded">
                 <h5 class="card-header text-center bg-primary">{{ activity }}</h5>
                 <div class="card-body text-primary px-1">
                     <div class="row">
-                        <div class="col-2">
+                        <div class="col-md-2 d-none d-md-inline">
                             <img src="{% static 'activity/images/' %}{{ activity.image }}" />
                         </div>
-                        <div class="col-10">
+                        <div class="col">
                             <p class="card-title lead">{{ activity.overview }}</p>
                         </div>
                     </div>
@@ -56,12 +56,12 @@
                                                 {% if progress == 'Pending' %}
                                                     ''
                                                 {% elif progress == 'Up next...' %}
-                                                    <a class="btn btn-outline-primary btn-block py-1"
+                                                    <a class="btn btn-outline-primary btn-lg btn-block py-1"
                                                        href="/activity/{{ activity.slug }}/{{ item.index }}/">
                                                         Do it...
                                                     </a>
                                                 {% else %}
-                                                    <a class="btn btn-outline-primary btn-block"
+                                                    <a class="btn btn-outline-primary btn-lg btn-block"
                                                        href="/activity/{{ activity.slug }}/{{ item.index }}/">
                                                         See it...
                                                     </a>
@@ -75,7 +75,7 @@
                         </ul>
                     {% endif %}
                     <div class=" row justify-content-center">
-                        <a class="btn btn-primary" href="/activity/welcome/">
+                        <a class="btn btn-primary btn-lg" href="/activity/welcome/">
                             Return to Welcome Page
                         </a>
                     </div>

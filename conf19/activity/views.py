@@ -3,7 +3,7 @@ from django.views import View
 
 import datetime
 
-from .models import Activity, MultiChoice, Response, get_items
+from .models import Activity, MultiChoice, Choice, Response, get_items
 
 class WelcomeView(View):
     template_name = 'activity/welcome.html'
@@ -56,7 +56,7 @@ class ItemView(View):
     def get(self, request, activity_slug, item_index):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
-        item = items[item_index]
+        item = items[item_index - 1]
         responses = Response.objects.filter(user=request.user, activity=activity, index=item.index)
         response = None
         if len(responses) == 1:
@@ -64,12 +64,33 @@ class ItemView(View):
         if type(item) == MultiChoice:
             self.template_name = 'activity/multi-choice.html'
             choices = item.choice_set.all()
-            context = {'user': request.user, 'activity': activity, 'response': response, 'item': item, 'choices': choices}
+            context = {'user': request.user, 'response': response, 'item': item, 'choices': choices}
 
         return render(request, self.template_name, context)
 
     def post(self, request, activity_slug, item_index):
-        pass
+        activity = Activity.objects.get(slug=activity_slug)
+        item = get_items(activity)[item_index-1]
+        if type(item) == MultiChoice:
+            self.template_name = 'activity/multi-choice.html'
+            choices = item.choice_set.all()
+            try:
+                selected_choice = request.POST['choice']
+            except (KeyError, Choice.DoesNotExist):
+                context = {'activity':item.activity, 'item':item, 'choices':choices, 'response':None}
+                context['error_message'] = 'You must choose one of the responses below.'
+                return render(request, self.template_name, context)
+            # make sure this user hasn't already responded to this item
+            if len(Response.objects.filter(user=request.user, activity=activity, item=item)) == 0:
+                response = Response(user=request.user, activity=activity, item=item, completed=True)
+            # if page.can_respond(request.user):
+            #     response = Response(user=request.user, activity=activity,
+            #                         page=page, multi_choice=str(choice_index),
+            #                         completed=True)
+            #     if not page.opinion:
+            #         response.correct = choice.correct
+            #     response.save()
+
 
 
 

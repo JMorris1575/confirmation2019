@@ -210,3 +210,25 @@ Or I could just import everything::
 
     from activity.models import *
 
+Thinking About the Response Model
+----------------------------------
+
+In trying to implement the post() method for the ItemView for MultiChoice items I realized that I need to rethink the
+Response Model. I need to be able to keep track of which items a particular user has completed but I don't always want
+to associate that user with their response. This suggests that I may need two models, one for Completions and the other
+for the actual responses. The completions can be recorded with the actual user, the Responses can be recorded with the
+actual user or with an anonymous user (who I will have to invent in the admin as one of the auth.users.)
+
+This also reinforces something I have known for some time, that the Item model, inherited by the models for the
+different item types, will have to include more information than it currently does. For instance, whether the response
+is supposed to be Public, Anonymous, or Semi-anonymous.
+
+It may be convenient to put a ``votes`` field in the MultiChoice model but that may not really be necessary. I think I
+can devise other ways to count them.
+
+By the way, last year's version of the Response model contained a ``completed`` boolean field. I'm not sure why, it
+seems that if there IS a response from that user for a particular activity and item, it would ALWAYS be marked ``True``.
+Why bother? Just create the Response and that, in itself, shows that there was one!
+
+
+
