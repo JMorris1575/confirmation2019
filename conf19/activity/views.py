@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 
 import datetime
 
-from .models import Activity, MultiChoice, Choice, Response, get_items
+from .models import Activity, MultiChoice, Choice, CompletedBy, Response, get_items
 
 class WelcomeView(View):
     template_name = 'activity/welcome.html'
@@ -16,7 +16,7 @@ class WelcomeView(View):
         for activity in activities:
             items = get_items(activity)
             item_count = len(items)
-            completed = len(Response.objects.filter(user=request.user, activity=activity, completed=True))
+            completed = len(CompletedBy.objects.filter(user=request.user, activity=activity))
             if item_count != 0:
                 percent_completed = completed/item_count * 100
                 if percent_completed < 100:
@@ -36,11 +36,11 @@ class SummaryView(View):
     def get(self, request, activity_slug):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
-        responses = Response.objects.filter(user=request.user, activity=activity.pk)
+        completed = CompletedBy.objects.filter(user=request.user, activity=activity.pk)
         data = []
         first_pass = True                          # this changes as soon as an incomplete page is found
         for item in items:
-            if responses.filter(index=item.index) and first_pass:
+            if completed.filter(index=item.index) and first_pass:
                 data.append((item, 'Completed'))    # If user has a response, call the page complete
             elif first_pass:
                 data.append((item, 'Up next...'))   # This is the next page to do
@@ -57,9 +57,10 @@ class ItemView(View):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
         item = items[item_index - 1]
+        completed = CompletedBy.objects.filter(user=request.user, activity=activity, index=item.index)
         responses = Response.objects.filter(user=request.user, activity=activity, index=item.index)
         response = None
-        if len(responses) == 1:
+        if len(completed) == 1:
             response = responses[0]
         if type(item) == MultiChoice:
             self.template_name = 'activity/multi-choice.html'
@@ -75,21 +76,20 @@ class ItemView(View):
             self.template_name = 'activity/multi-choice.html'
             choices = item.choice_set.all()
             try:
-                selected_choice = request.POST['choice']
+                selected_choice = int(request.POST['choice'])
             except (KeyError, Choice.DoesNotExist):
                 context = {'activity':item.activity, 'item':item, 'choices':choices, 'response':None}
                 context['error_message'] = 'You must choose one of the responses below.'
                 return render(request, self.template_name, context)
             # make sure this user hasn't already responded to this item
-            if len(Response.objects.filter(user=request.user, activity=activity, item=item)) == 0:
-                response = Response(user=request.user, activity=activity, item=item, completed=True)
-            # if page.can_respond(request.user):
-            #     response = Response(user=request.user, activity=activity,
-            #                         page=page, multi_choice=str(choice_index),
-            #                         completed=True)
-            #     if not page.opinion:
-            #         response.correct = choice.correct
-            #     response.save()
+            if len(Response.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
+                response = Response(user=request.user, activity=activity, index=item_index,
+                                    multi_choice=selected_choice)
+                response.multi_choice = selected_choice
+                if not item.opinion:
+                    response.correct = selected_choice.correct
+                response.save()
+        return redirect('activity:item', activity_slug, item_index)
 
 
 

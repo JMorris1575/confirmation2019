@@ -50,6 +50,12 @@ class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField(unique=True)
     title = models.CharField(max_length=25, null=True, blank=True)
+    opinion = models.BooleanField(default=False)
+    privacy_type = models.CharField(max_length=2,   # indicates privacy level of an item
+                                 choices=[('OP', 'Open'),               # responder able to be openly published
+                                          ('SA', 'Semi-Anonymous'),     # responder only visible to team members
+                                          ('AN', 'Anonymous')],         # responder not saved
+                                 default='OP')
 
     def __str__(self):
         return self.activity.slug + ': ' + str(self.index)
@@ -97,20 +103,15 @@ class Response(models.Model):
     """
     Records the user's responses for the various kinds of items and keeps track of which items have been completed.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) # could be 'Unidentified'
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField()      # indicates which item in the activity received this response
-    # item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    last_edited = models.DateTimeField(auto_now=True)
-    # essay = models.TextField(blank=True)
     multi_choice = models.PositiveSmallIntegerField(null=True, blank=True)
     true_false = models.BooleanField(default=False)
     correct = models.NullBooleanField(null=True)
-    completed = models.BooleanField(default=False)
 
     class Meta():
-        ordering = ['created']
+        ordering = ['user']
 
     def __str__(self):
         name = self.user.first_name + ' ' + self.user.last_name
@@ -118,7 +119,7 @@ class Response(models.Model):
             possessive_ending = "'"
         else:
             possessive_ending = "'s"
-        return name + possessive_ending + ' response to ' + str(self.page)
+        return name + possessive_ending + ' response to ' + self.activity.slug + '/' + str(self.index)
 
     def is_correct(self):
         return self.correct
@@ -143,3 +144,15 @@ class Response(models.Model):
         :return: boolean
         """
         return self.completed
+
+
+class CompletedBy(models.Model):
+    """
+    Records whether the user has responded to a particular item
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
+    index = models.SmallIntegerField()
+    response = models.OneToOneField(Response, on_delete=models.CASCADE, null=True, blank=True, default=None)
+    created = models.DateTimeField(auto_now_add=True)
+    last_edited = models.DateTimeField(auto_now=True)

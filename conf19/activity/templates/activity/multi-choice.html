@@ -14,7 +14,8 @@
             {% for choice in choices %}
                 <div class="form-check ml-3 ml-sm-5 my-4">
                     <h4>
-                        <input class="form-check-input mt-2" type="radio" name="choice" value="{{ choice }}" id="radio{{ forloop.counter }}">
+                        <input class="form-check-input mt-2" type="radio" name="choice"
+                               value="{{ forloop.counter }}" id="radio{{ forloop.counter }}">
                         <label class="form-check-label" for="radio{{ forloop.counter }}">{{ choice }}</label>
                     </h4>
                 </div>

@@ -230,5 +230,39 @@ By the way, last year's version of the Response model contained a ``completed`` 
 seems that if there IS a response from that user for a particular activity and item, it would ALWAYS be marked ``True``.
 Why bother? Just create the Response and that, in itself, shows that there was one!
 
+Addition to the Response Model
+------------------------------
 
+Here is the code from last year concerning the various types of discussions::
 
+    discussion_type = models.CharField(max_length=20,   # indicates type of discussion
+                                       choices=[('OP', 'Open'),
+                                                ('SA', 'Semi-Anonymous'),
+                                                ('AN', 'Anonymous')],
+                                       blank=True,
+                                       default='')
+
+I am thinking of changing it to the following::
+
+    item_type = models.CharField(max_length=2,   # indicates privacy level of an item
+                                 choices=[('OP', 'Open'),               # responder able to be openly published
+                                          ('SA', 'Semi-Anonymous'),     # responder only visible to team members
+                                          ('AN', 'Anonymous')],         # responder not saved
+                                 default='OP')
+
+Before I do this I should think clearly through how this will affect the processing of the responses...
+
++-----------+---------------------------------------------------------------------------------------------+
+| item_type | Handling                                                                                    |
++===========+=============================================================================================+
+|   'OP'    | Items marked 'OP' are open for publication. User is saved to Completed and to Responses.    |
++-----------+---------------------------------------------------------------------------------------------+
+|   'SA'    | Items marked 'SA' are semi-anonymous. User is saved to Completed and to Responses but the   |
+|           | pages that publicly display responses will not include the user's name. Only team members   |
+|           | can access a page that reveals both response and the user's name. I will have to develop a  |
+|           | special /team/ url.                                                                         |
++-----------+---------------------------------------------------------------------------------------------+
+|   'AN'    | Items marked 'AN' are anonymous. For some items, such as MultiChoice and TrueFalse, the     |
+|           | User is saved to Completed but something like FakeUser is saved to Responses. For others,   |
+|           | such as Discussion and perhaps Essay items, no record is even kept in Completed.            |
++-----------+---------------------------------------------------------------------------------------------+
