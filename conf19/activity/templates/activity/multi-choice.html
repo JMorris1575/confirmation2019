@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block item-content %}
+    reqiest.method = {{ request.method }}
     {% if not response %}
         <form action="{% url 'activity:item' item.activity.slug item.index %}" method="post">
             {% csrf_token %}

@@ -73,16 +73,18 @@ class ItemView(View):
         activity = Activity.objects.get(slug=activity_slug)
         item = get_items(activity)[item_index-1]
         if type(item) == MultiChoice:
-            self.template_name = 'activity/multi-choice.html'
             choices = item.choice_set.all()
             try:
                 selected_choice = int(request.POST['choice'])
             except (KeyError, Choice.DoesNotExist):
+                self.template_name = 'activity/multi-choice.html'
                 context = {'activity':item.activity, 'item':item, 'choices':choices, 'response':None}
                 context['error_message'] = 'You must choose one of the responses below.'
                 return render(request, self.template_name, context)
             # make sure this user hasn't already responded to this item
+            print('Response.objects.filter(user=request.user, activity=activity, index=item_index) = ', Response.objects.filter(user=request.user, activity=activity, index=item_index))
             if len(Response.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
+                print('***************** Got here **************************')
                 response = Response(user=request.user, activity=activity, index=item_index,
                                     multi_choice=selected_choice)
                 response.multi_choice = selected_choice
