@@ -244,25 +244,47 @@ Here is the code from last year concerning the various types of discussions::
 
 I am thinking of changing it to the following::
 
-    item_type = models.CharField(max_length=2,   # indicates privacy level of an item
-                                 choices=[('OP', 'Open'),               # responder able to be openly published
-                                          ('SA', 'Semi-Anonymous'),     # responder only visible to team members
-                                          ('AN', 'Anonymous')],         # responder not saved
-                                 default='OP')
+    privacy_type = models.CharField(max_length=2,   # indicates privacy level of an item
+                                    choices=[('OP', 'Open'),               # responder able to be openly published
+                                             ('SA', 'Semi-Anonymous'),     # responder only visible to team members
+                                             ('AN', 'Anonymous')],         # responder not saved
+                                    default='OP')
 
 Before I do this I should think clearly through how this will affect the processing of the responses...
 
-+-----------+---------------------------------------------------------------------------------------------+
-| item_type | Handling                                                                                    |
-+===========+=============================================================================================+
-|   'OP'    | Items marked 'OP' are open for publication. User is saved to Completed and to Responses.    |
-+-----------+---------------------------------------------------------------------------------------------+
-|   'SA'    | Items marked 'SA' are semi-anonymous. User is saved to Completed and to Responses but the   |
-|           | pages that publicly display responses will not include the user's name. Only team members   |
-|           | can access a page that reveals both response and the user's name. I will have to develop a  |
-|           | special /team/ url.                                                                         |
-+-----------+---------------------------------------------------------------------------------------------+
-|   'AN'    | Items marked 'AN' are anonymous. For some items, such as MultiChoice and TrueFalse, the     |
-|           | User is saved to Completed but something like FakeUser is saved to Responses. For others,   |
-|           | such as Discussion and perhaps Essay items, no record is even kept in Completed.            |
-+-----------+---------------------------------------------------------------------------------------------+
++--------------+---------------------------------------------------------------------------------------------+
+| privacy_type | Handling                                                                                    |
++==============+=============================================================================================+
+|   'OP'       | Items marked 'OP' are open for publication. User is saved to Completed and to Responses.    |
++--------------+---------------------------------------------------------------------------------------------+
+|   'SA'       | Items marked 'SA' are semi-anonymous. User is saved to Completed and to Responses but the   |
+|              | pages that publicly display responses will not include the user's name. Only team members   |
+|              | can access a page that reveals both response and the user's name. I will have to develop a  |
+|              | special /team/ url.                                                                         |
++--------------+---------------------------------------------------------------------------------------------+
+|   'AN'       | Items marked 'AN' are anonymous. For some items, such as MultiChoice and TrueFalse, the     |
+|              | User is saved to Completed but something like FakeUser is saved to Responses. For others,   |
+|              | such as Discussion and perhaps Essay items, no record is even kept in Completed.            |
++--------------+---------------------------------------------------------------------------------------------+
+
+Dealing with Different Item Types
+---------------------------------
+
+While working on implementing the behavior of the program after posting an Anonymous ('AN') MultiChoice response I
+discovered that my thinking has not been too clear on the subject. I was trying to get the program to display the user's
+response for possible editing but, of course, if their response was properly saved anonymously there would be no way to
+do that. The current user's response could not be distinguished from the others with the same activity and item index.
+
+That led me to think about where the logic for deciding what to do in each case should reside: the view, the .html page
+or the model? Thinking of the addage about fat models and skinny views got me to thinking of a simpler way to save the
+user information with the response: have the view call a ``stored_user`` method of the ``Item`` class which could
+check on the value of ``privacy_type`` and return either the request.user or the anonymous user (currently called
+Anonymous I believe).
+
+The logic for what gets displayed: a review page giving a chance to edit or a page displaying the next item up for
+completion still makes sense in the view it seems to me. I'm thinking that, for 'AN' items the program will have to
+figure out whether there IS a next page and, if so, go to it, otherwise go back to the summary page. It would be nice
+to create some kind of thank-you page with the possibility of displaying a ``closing_message`` (from the Item model)
+which would display and then, when dismissed, bring the user back to the welcome page. I'm thinking this would involve
+creating a new kind of item model: a ClosingMessage model to store and display this message.
+
