@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
 from django.views import View
 
 import datetime
@@ -58,10 +59,10 @@ class ItemView(View):
         items = get_items(activity)
         item = items[item_index - 1]
         completed = CompletedBy.objects.filter(user=request.user, activity=activity, index=item.index)
-        responses = Response.objects.filter(user=request.user, activity=activity, index=item.index)
-        response = None
-        if len(completed) == 1:
-            response = responses[0]
+        try:
+            response = Response.objects.get(user=request.user, activity=activity, index=item.index)
+        except Response.DoesNotExist:
+            response = None
         if type(item) == MultiChoice:
             self.template_name = 'activity/multi-choice.html'
             choices = item.choice_set.all()
@@ -82,23 +83,19 @@ class ItemView(View):
                 context['error_message'] = 'You must choose one of the responses below.'
                 return render(request, self.template_name, context)
             # make sure this user hasn't already responded to this item
-            print('Response.objects.filter(user=request.user, activity=activity, index=item_index) = ', Response.objects.filter(user=request.user, activity=activity, index=item_index))
-            if len(Response.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
-                print('***************** Got here **************************')
-                response = Response(user=request.user, activity=activity, index=item_index,
-                                    multi_choice=selected_choice)
-                response.multi_choice = selected_choice
+            if len(CompletedBy.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
+                completed_by = CompletedBy(user=request.user, activity=activity, index=item_index)
+                completed_by.save()
+                if item.privacy_type == 'AN':
+                    user = User.objects.get(username='Anonymous')
+                    response = Response(user=user, activity=activity, index=item_index,
+                                        multi_choice=selected_choice)
+                    response.save()
+                    # need to render the next page if available
+                else:
+                    response = Response(user=request.user, activity=activity, index=item_index,
+                                        multi_choice=selected_choice)
                 if not item.opinion:
                     response.correct = selected_choice.correct
                 response.save()
         return redirect('activity:item', activity_slug, item_index)
-
-
-
-
-
-
-
-
-
-

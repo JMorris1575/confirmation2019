@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block item-content %}
-    reqiest.method = {{ request.method }}
+    Response = {{ response }}
     {% if not response %}
         <form action="{% url 'activity:item' item.activity.slug item.index %}" method="post">
             {% csrf_token %}
@@ -24,7 +24,25 @@
             <div class=" row justify-content-center">
                 <input class="btn btn-outline-primary btn-lg" value="Submit Response" type="submit"/>
             </div>
-
         </form>
+    {% else %}
+        {% with response.multi_choice as multi_choice %}
+            <p>
+                You answered {{ multi_choice }}
+            </p>
+            {% if item.reveal_answer %}
+                {% if response.correct %}
+                    <p>That is correct!</p>
+                {% else %}
+                    <p>Sorry! That is not correct.</p>
+                    <p>The correct answer is: {{ multi_choice.correct_choice }}</p>
+                {% endif %}
+                {% if item.explanation != '' %}
+                    <p>{{ item.explanation }}</p>
+                {% endif %}
+            {% else %}
+                {% include 'activity/edit-delete.html' %}
+            {% endif %}
+        {% endwith %}
     {% endif %}
 {% endblock %}

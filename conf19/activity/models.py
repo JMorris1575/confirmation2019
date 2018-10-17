@@ -156,3 +156,6 @@ class CompletedBy(models.Model):
     response = models.OneToOneField(Response, on_delete=models.CASCADE, null=True, blank=True, default=None)
     created = models.DateTimeField(auto_now_add=True)
     last_edited = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Completed by: " + self.user.first_name + ' ' + self.user.last_name
