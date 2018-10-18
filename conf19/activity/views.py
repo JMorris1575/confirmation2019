@@ -52,6 +52,16 @@ class SummaryView(View):
                                                     'data': data,})
 
 
+class DisplayView(View):
+
+    template_name = 'activity/display.html'
+
+    def get(self, request, activity_slug):
+        activity = Activity.objects.get(slug=activity_slug)
+        items = get_items(activity)
+        return render(request, self.template_name, {'activity': activity, 'items': items})
+
+
 class ItemView(View):
 
     def get(self, request, activity_slug, item_index):
@@ -59,8 +69,9 @@ class ItemView(View):
         items = get_items(activity)
         item = items[item_index - 1]
         completed = CompletedBy.objects.filter(user=request.user, activity=activity, index=item.index)
+        responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
         try:
-            response = Response.objects.get(user=request.user, activity=activity, index=item.index)
+            response = Response.objects.get(user=request.user, activity=activity, index=item_index)
         except Response.DoesNotExist:
             response = None
         if type(item) == MultiChoice:

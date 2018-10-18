@@ -1,0 +1,46 @@
+{% extends parent_template|default:"base.html" %}
+{% load static %}
+
+{% block title %}
+    {{ block.super }}|Display
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card my-3 shadow p-3 bg-white rounded">
+                <h5 class="card-header text-center bg-primary">{{ activity }}</h5>
+                <div class="card-body text-primary px-1">
+                    <div class="row">
+                        <div class="col-md-2 d-none d-md-inline">
+                            <img src="{% static 'activity/images/' %}{{ activity.image }}" />
+                        </div>
+                        <div class="col">
+                            <p class="card-title lead">{{ activity.overview }}</p>
+                        </div>
+                    </div>
+                    <hr class="mt-3 mb-1">
+                    {% for item in items %}
+                        <h4>
+                            {% if item.title %}
+                                {{ item.title }}
+                            {% else %}
+                                Item {{ item.index }}
+                            {% endif %}
+                        </h4>
+                        <p class="lead">{{ item.get_text }}</p>
+                        <ul>
+                            {% for line in item.get_subtext %}
+                            <li>
+                                <p>{{ line }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <hr class="my-2">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -64,6 +64,31 @@ class Item(models.Model):
         ordering = ['index']
         abstract = True
 
+    def previous(self):
+        """
+        Returns the previous page if there is one, otherwise returns None
+        :return: '/activity/<activity_slug>/<item_index>/ or None
+        """
+        index = self.index
+        slug = self.activity.slug
+        if index == 1:
+            return None
+        else:
+            return '/activity/' + slug + '/' + str(index - 1) + '/'
+
+    def next(self):
+        """
+        Returns the next item if there is one, otherwise returns None
+        :return: '/activity/<activity_slug>/<page_index>/ or None
+        """
+        index = self.index
+        slug = self.activity.slug
+        max = len(Item.objects.filter(activity=self.activity))
+        if index == max:
+            return None
+        else:
+            return '/activity/' + slug + '/' + str(index + 1) + '/'
+
 
 class MultiChoice(Item):
     text = models.CharField(max_length=512)
@@ -74,6 +99,19 @@ class MultiChoice(Item):
     class Meta:
         verbose_name = 'multiple choice item'
         ordering = ['index']
+
+    def get_text(self):
+        return self.text
+
+    def get_choices(self):
+        return self.choice_set
+
+    def get_subtext(self):
+        choices = Choice.objects.filter(multi_choice=self)
+        subtext = []
+        for choice in choices:
+            subtext.append(choice.text)
+        return subtext
 
 
 class Choice(models.Model):
@@ -97,6 +135,12 @@ class TrueFalse(Item):
     class Meta:
         verbose_name = 'True or false item'
         ordering = ['index']
+
+    def get_text(self):
+        return self.statement
+
+    def get_subtext(self):
+        return ['True or False']
 
 
 class Response(models.Model):

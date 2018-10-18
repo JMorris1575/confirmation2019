@@ -288,3 +288,102 @@ to create some kind of thank-you page with the possibility of displaying a ``clo
 which would display and then, when dismissed, bring the user back to the welcome page. I'm thinking this would involve
 creating a new kind of item model: a ClosingMessage model to store and display this message.
 
+Thinking Trough the Process of Item get() and post()
+====================================================
+
+I'm having a bad time with the ItemView get() and post() methods because I haven't thought this through. There are
+several things to consider: whether this is the first time get() is entered in order to display the input form or if the
+input form has just been filled out and posted and this entry is to display the user's response for possible editing.
+Also, it makes a difference whether the item in question is marked 'AN' for Anonymous or not. Here is an attempt to
+follow the necessary logic and obtain what needs to be obtained for the template:
+
+#. User clicks on the button on the summary page to respond to the item in question.
+#. In ItemView.get(), user, activity and item_index are known, but this item is not marked completed by this user.
+#. The input form appears allowing the user to respond.
+#. In ItemView.post() user, acivity and item_index are known along with the users response. The item is marked as being
+   CompletedBy this user and, if the item is 'OP' or 'SA' the user's identity is saved with the response. If the item is
+   'AN', the Anonymous User is stored with the response.
+#. ItemView.post() redirects to ItemView.get() where user, acivity and item_index are known. This time the user has a
+   CompletedBy entry for this item.
+
+   A. If the item is marked 'AN' the user goes automatically to the next item. If the next
+      item is the closing page for the activity the user goes from there back to the welcome page.
+   #. If the item is marked 'OP' or 'SA' the user will be given an opportunity to edit his or her response. Since there
+      is a response listed for this user it can be sent to the template. If the item is a discussion item, the user is
+      simply directed to the discussion display page where there is automatically an opportunity for a user to edit his
+      or her entries.
+
+This suggests that the logic for figuring out what to do needs to be in the ItemView rather than in the template,
+though the template will have to have it's own logic to determine what to display.
+
+A Major Refactoring
+===================
+
+This whole process seems just too complex. I'm thinking it may have been better after all to divided the functions of
+this program into a larger number of Django apps and better keep to the ideal of each app doing just one thing and doing
+it well.
+
+Right now my activity app is trying to do most all of the work. I may want, instead, to have it manage a list of items
+and have the items of various kinds each have their own apps. Thus I could have a survey app that has its own models
+for survey items, all subclassing the Item model from the activity app. Perhaps the activity app can keep generic
+models of various sorts of activities, such as MultiChoice, TrueFalse, Essay, Discussion, and each of the apps, like
+the survey app, could have its own models derive from them. A diagram of all these relationships could be helpful as
+I try to figure it all out.
+
+Meanwhile, I'd like to have a way to quickly print out my whole survey01 activity, questions and answers, since I am
+probably going to have to delete and recreate the conf19 database. Perhaps I will do that first.
+
+Rescuing the Data from the Database
+-----------------------------------
+
+Well, not really rescuing it, just printing it out so it can be re-entered. I want to interate through the items in
+the activity and display them on an html page. This will require a new urlconf for the activity app, a new view, and
+a new html template.
+
+The urlconf can be ``activity/<activity.slug>/display``
+
+The new view can be called ``DisplayView``, subclass ``View`` and have to override only the get() method. It may have to
+collect quite a bit of information to send through the ``context`` variable or the template language may be
+sophisiticated enough to get what it needs just from the activity. (``{% for item in activity.item_set %}`` for
+instance, and each model may know how to gather a list of display lines to be formatted by the template.
+
+The new template can be called ``display.html`` and, once it is displayed, be printed through the browser.
+
+...
+
+That worked out fairly well. I couldn't do the ``{% for item in activity.item_set %}`` thing though. I might have been
+able to if I'd worked at it long enough, or created a method in the Activity model to supply the associated set of
+items. It was easier just to add the items to the context variable in the view.
+
+I did have to print a version of the page shrunk down to 44% of its size to get what is really three html pages
+header.html, display.html and footer.html, to print on one sheet. Printing is a topic for later study. It's not of great
+concern to me now.
+
+Rethinking the Apps
+===================
+
+Here is a chart of various apps and their duties as I now conceive them:
+
++--------------+-------------------------------------------------------------------------------------------------------+
+|   App Name   |                                                Duties                                                 |
++==============+=======================================================================================================+
+| activity     | #. Define the Activity, Image and Item models; and perhaps generic models of all possible item types. |
+|              | #. Define the Activity model to include:                                                              |
+|              |                                                                                                       |
+|              |    A. index, name, slug, overview, image, publish_date, closing_date, and visible fields.             |
+|              |    #. a get_items method to retrieve the items for this activity.                                     |
+|              |                                                                                                       |
+|              | #. Define the Item model to include:                                                                  |
+|              |                                                                                                       |
+|              |    A. activity, index, and title fields.                                                              |
+|              |    #. previous() and next() methods to handle paging [may require permission calls to child models]   |
+|              |                                                                                                       |
+|              | #. Define the Image model, before the Activity model, to include filename and category                |
+|              | #. Define the generic models, such as MultiChoice, TrueFalse, Essay and Discussion as follows:        |
+|              |                                                                                                       |
+|              |    A. MultiChoice:                                                                                    |
+|              |                                                                                                       |
+|              |       i.
++--------------+-------------------------------------------------------------------------------------------------------+
+
+
