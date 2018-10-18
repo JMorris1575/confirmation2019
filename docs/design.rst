@@ -367,8 +367,8 @@ Here is a chart of various apps and their duties as I now conceive them:
 +--------------+-------------------------------------------------------------------------------------------------------+
 |   App Name   |                                                Duties                                                 |
 +==============+=======================================================================================================+
-| activity     | #. Define the ``Activity``, ``Image``, ``Item`` and ``CompletedBy`` models; and perhaps generic       |
-|              |    models of all possible item types.                                                                 |
+| activity     | #. Define the ``Activity``, ``Image``, ``Item``, ``ResponseGeneric`` and ``CompletedBy`` models; and  |
+|              |    generic models of all possible item types.                                                         |
 |              | #. Define the ``Activity`` model to include:                                                          |
 |              |                                                                                                       |
 |              |    A. ``index``, ``name``, ``slug``, ``overview``, ``image``, ``publish_date``, ``closing_date``, and |
@@ -377,11 +377,17 @@ Here is a chart of various apps and their duties as I now conceive them:
 |              |                                                                                                       |
 |              | #. Define the ``Item`` model to include:                                                              |
 |              |                                                                                                       |
-|              |    A. ``activity``, ``index``, ``title``, ``opinion``, ``reveal_answer`` and ``visible`` fields.      |
+|              |    A. ``activity``, ``index``, ``title``, ``privacy_type``, ``opinion``, ``reveal_answer`` and        |
+|              |       ``visible`` fields.                                                                             |
 |              |    #. ``previous()`` and ``next()`` methods to handle paging [may require permission calls to child   |
 |              |       models].                                                                                        |
 |              |                                                                                                       |
 |              | #. Define the ``Image`` model, before the ``Activity`` model, to include filename and category.       |
+|              | #. Define the ``GenericResponse`` model to include:                                                   |
+|              |                                                                                                       |
+|              |    A. ``user``, ``activity`` and ``item_index`` fields.                                               |
+|              |    #. know that ``user`` here may end up to be ``Anonymous User``.                                    |
+|              |                                                                                                       |
 |              | #. Define the ``CompletedBy`` model to include:                                                       |
 |              |                                                                                                       |
 |              |    A. ``user``, ``activity``, ``created`` and ``last_edited`` fields.                                 |
@@ -416,17 +422,49 @@ Here is a chart of various apps and their duties as I now conceive them:
 |              |    A. The ``WelcomeView``, ``SummaryView`` and ``DisplayView`` will work much as they do now.         |
 |              |    #. The ``ItemView`` will simply dispatch each item to its own app for processing.                  |
 +--------------+-------------------------------------------------------------------------------------------------------+
-| multi_choice | #. Define ``MultiChoice`` and ``Response`` models.                                                    |
-| _open        | #. Define the ``MultiChoice`` model, subclassing ``MultiChoiceGeneric`` to include:                   |
+| multi_choice | #. Define ``MultiChoice`` and ``MCResponse`` models.                                                  |
+|              | #. Define the ``MultiChoice`` model, subclassing ``MultiChoiceGeneric`` to include:                   |
 |              |                                                                                                       |
 |              |    A. ``explanation`` to be revealed if ``reveal_answer`` is True. (optional field)                   |
-|              |    #. any methods that may be necessary.                                                              |
+|              |    #. any new methods that may be necessary.                                                          |
 |              |                                                                                                       |
-|              | #. Define the ``Response`` model as follows:                                                          |
+|              | #. Define the ``MCResponse``, subclassing ``ResponseGeneric``, to include:                            |
 |              |                                                                                                       |
-|              |    A. ``user``, ``activity``, ``item_index`` and ``user_choice`` fields.                              |
-|              |    #. ``user`` will the ``request.user``                                                              |
+|              |    A. a ``user_choice`` field to store the user's response.                                           |
+|              |    #. any new methods that may be necessary.                                                          |
 |              |                                                                                                       |
-|              | #. What should the views do?                                                                          |
+|              | #. Define the views here.                                                                             |
++--------------+-------------------------------------------------------------------------------------------------------+
+| true_false   | #. Define ``TrueFalse`` and ``TFResponse`` models.                                                    |
+|              | #. Define the ``TrueFalse`` model, subclassing ``TrueFalseGeneric`` to include:                       |
+|              |                                                                                                       |
+|              |    A. ``correct_response`` for items that are not marked opinion.                                     |
+|              |    #. any new methods that may be necessary.                                                          |
+|              |                                                                                                       |
+|              | #. Define the ``TFResponse`` model, subclassing ``ResponseGeneric``, to include:                      |
+|              |                                                                                                       |
+|              |    A. a ``user_response`` boolean field to store the user's response.                                 |
+|              |    #. any new methods that may be necessary.                                                          |
+|              |                                                                                                       |
+|              | #. Define the views here.                                                                             |
++--------------+-------------------------------------------------------------------------------------------------------+
+| survey       | #. Define ``SurveyMC`` and ``SurveyTF`` models.                                                       |
+|              | #. Define the ``SurveyMC`` model, subclassing ``MultiChoiceGeneric``, to include nothing new.         |
+|              | #. Define the ``SurveyChoices`` model, subclassing ``ChoiceGeneric``, to include:                     |
+|              |                                                                                                       |
+|              |    A. ``vote_count`` to store the number of votes for that choice.                                    |
+|              |    #. any new methods that may be necessary.                                                          |
+|              |                                                                                                       |
+|              | #. Define the ``SurveyTF`` model, subclassing ``TrueFalse`` to include:                               |
+|              |    A. ``true_votes`` and ``false_votes`` to keep track of the statistics.                             |
+|              |    #. any new methods that may be necessary.                                                          |
+|              |                                                                                                       |
+|              | #. Define the views here.                                                                             |
++--------------+-------------------------------------------------------------------------------------------------------+
+| essay        | #. Define ``Essay`` and ``EssayResponse`` models.                                                     |
++--------------+-------------------------------------------------------------------------------------------------------+
+| discussion   | #. Define ``Discussion`` and ``DiscussionResponse`` models.                                           |
++--------------+-------------------------------------------------------------------------------------------------------+
+| challenge    | #. Define ``Challenge`` and ``ChallengeResponse`` models.                                             |
 +--------------+-------------------------------------------------------------------------------------------------------+
 
