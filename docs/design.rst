@@ -433,7 +433,28 @@ Here is a chart of various apps and their duties as I now conceive them:
 |              |    A. a ``user_choice`` field to store the user's response.                                           |
 |              |    #. any new methods that may be necessary.                                                          |
 |              |                                                                                                       |
-|              | #. Define the views here.                                                                             |
+|              | #. The MultiChoiceView, subclassing View, on:                                                         |
+|              |                                                                                                       |
+|              |    A. ``get()`` should:                                                                               |
+|              |                                                                                                       |
+|              |       i. if no previous response has been made, displays the text with its choices in a form          |
+|              |       #. if a previous response has been made:                                                        |
+|              |                                                                                                       |
+|              |          a. if it is not an opinion item and the answer is to be revealed, gives the answer           |
+|              |          #. if it is not an opinion item and the answer is not to be revealed simply displays the     |
+|              |             user's choice and offers the chance to edit the response.                                 |
+|              |          #. if it is an opinion item, the user's choice is revealed and can be edited.                |
+|              |                                                                                                       |
+|              |    B. ``post()`` should:                                                                              |
+|              |                                                                                                       |
+|              |       i. send an error back if the user made no selection                                             |
+|              |       #. record the user's choice with his or her identity and redirect to the same page.             |
+|              |                                                                                                       |
+|              | #. The MultiChoiceEditView, subclassing View, on:                                                     |
+|              |                                                                                                       |
+|              |    A. ``get()`` should: redisplay the input form with the user's previous choice already marked.      |
+|              |                                                                                                       |
+|              |    #. ``post()`` should: find the user's old choice and change it to the new choice.                  |
 +--------------+-------------------------------------------------------------------------------------------------------+
 | true_false   | #. Define ``TrueFalse`` and ``TFResponse`` models.                                                    |
 |              | #. Define the ``TrueFalse`` model, subclassing ``TrueFalseGeneric`` to include:                       |
@@ -468,3 +489,5 @@ Here is a chart of various apps and their duties as I now conceive them:
 | challenge    | #. Define ``Challenge`` and ``ChallengeResponse`` models.                                             |
 +--------------+-------------------------------------------------------------------------------------------------------+
 
+This is also getting very complex. Perhaps I should keep what I have but create a separate ``survey`` app with models
+and views developed something like what is described for the ``status`` app above.
