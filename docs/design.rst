@@ -367,23 +367,66 @@ Here is a chart of various apps and their duties as I now conceive them:
 +--------------+-------------------------------------------------------------------------------------------------------+
 |   App Name   |                                                Duties                                                 |
 +==============+=======================================================================================================+
-| activity     | #. Define the Activity, Image and Item models; and perhaps generic models of all possible item types. |
-|              | #. Define the Activity model to include:                                                              |
+| activity     | #. Define the ``Activity``, ``Image``, ``Item`` and ``CompletedBy`` models; and perhaps generic       |
+|              |    models of all possible item types.                                                                 |
+|              | #. Define the ``Activity`` model to include:                                                          |
 |              |                                                                                                       |
-|              |    A. index, name, slug, overview, image, publish_date, closing_date, and visible fields.             |
-|              |    #. a get_items method to retrieve the items for this activity.                                     |
+|              |    A. ``index``, ``name``, ``slug``, ``overview``, ``image``, ``publish_date``, ``closing_date``, and |
+|              |       visible fields.                                                                                 |
+|              |    #. a ``get_items()`` method to retrieve the items for this activity.                               |
 |              |                                                                                                       |
-|              | #. Define the Item model to include:                                                                  |
+|              | #. Define the ``Item`` model to include:                                                              |
 |              |                                                                                                       |
-|              |    A. activity, index, and title fields.                                                              |
-|              |    #. previous() and next() methods to handle paging [may require permission calls to child models]   |
+|              |    A. ``activity``, ``index``, ``title``, ``opinion``, ``reveal_answer`` and ``visible`` fields.      |
+|              |    #. ``previous()`` and ``next()`` methods to handle paging [may require permission calls to child   |
+|              |       models].                                                                                        |
 |              |                                                                                                       |
-|              | #. Define the Image model, before the Activity model, to include filename and category                |
-|              | #. Define the generic models, such as MultiChoice, TrueFalse, Essay and Discussion as follows:        |
+|              | #. Define the ``Image`` model, before the ``Activity`` model, to include filename and category.       |
+|              | #. Define the ``CompletedBy`` model to include:                                                       |
 |              |                                                                                                       |
-|              |    A. MultiChoice:                                                                                    |
+|              |    A. ``user``, ``activity``, ``created`` and ``last_edited`` fields.                                 |
+|              |    #. any methods that become necessary in this new approach.                                         |
 |              |                                                                                                       |
-|              |       i.
+|              | #. Define the generic models, such as ``MultiChoice``, ``TrueFalse``, ``Essay`` and ``Discussion`` as |
+|              |    follows:                                                                                           |
+|              |                                                                                                       |
+|              |    A. ``MultiChoiceGeneric`` (subclassing ``Item``):                                                  |
+|              |                                                                                                       |
+|              |       i. Define a ``text`` field to contain the prompt or question.                                   |
+|              |       #. Define ``get_text()``, ``get_choices()`` and ``get_subtext()`` methods.                      |
+|              |                                                                                                       |
+|              |    #. ``TrueFalseGeneric`` (subclassing ``Item``):                                                    |
+|              |                                                                                                       |
+|              |       i. Define a ``statement`` field.                                                                |
+|              |       #. Define ``get_text()`` and ``get_subtext()`` methods.                                         |
+|              |                                                                                                       |
+|              |    #. ``EssayGeneric`` (subclassing ``Item``):                                                        |
+|              |                                                                                                       |
+|              |       i. Define a ``text`` field to contain the prompt or question.                                   |
+|              |       #. Define ``get_text()`` and ``get_subtext()`` methods. (``get_subtext`` returns ["Essay"]      |
+|              |                                                                                                       |
+|              |    #. ``DiscussionGeneric`` (subclassing ``Item``):                                                   |
+|              |                                                                                                       |
+|              |       i. Define a ``text`` field to contain the prompt or question.                                   |
+|              |       #. Define ``get_text()`` and ``get_subtext()`` methods. (``get_subtext`` returns ["Discussion"] |
+|              |                                                                                                       |
+|              | #. Define ``WelcomeView``, ``SummaryView``, ``DisplayView`` and ``ItemView`` view classes all         |
+|              |    subclassing ``View``.                                                                              |
+|              |                                                                                                       |
+|              |    A. The ``WelcomeView``, ``SummaryView`` and ``DisplayView`` will work much as they do now.         |
+|              |    #. The ``ItemView`` will simply dispatch each item to its own app for processing.                  |
 +--------------+-------------------------------------------------------------------------------------------------------+
-
+| multi_choice | #. Define ``MultiChoice`` and ``Response`` models.                                                    |
+| _open        | #. Define the ``MultiChoice`` model, subclassing ``MultiChoiceGeneric`` to include:                   |
+|              |                                                                                                       |
+|              |    A. ``explanation`` to be revealed if ``reveal_answer`` is True. (optional field)                   |
+|              |    #. any methods that may be necessary.                                                              |
+|              |                                                                                                       |
+|              | #. Define the ``Response`` model as follows:                                                          |
+|              |                                                                                                       |
+|              |    A. ``user``, ``activity``, ``item_index`` and ``user_choice`` fields.                              |
+|              |    #. ``user`` will the ``request.user``                                                              |
+|              |                                                                                                       |
+|              | #. What should the views do?                                                                          |
++--------------+-------------------------------------------------------------------------------------------------------+
 
