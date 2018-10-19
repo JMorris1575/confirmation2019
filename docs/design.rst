@@ -594,5 +594,90 @@ I copied the resulting file to OneDrive for transfer to the rectory computer.
 
 Finally, I will do another commit and push to save the changes to this file.
 
+---------------------------
+
+At the rectory first I did a ``VCS->Git->Pull`` to bring in my changes from home.
+
+Then ``python manage.py migrate`` to update the database here. Result: "Applying survey.0001_initial... OK"
+
+Then I copied ``2018-10-19-user-activity-survey-polls.json`` to my ``conf19`` directory and ran:
+
+``python manage.py loaddata 2018-10-19-user-activity-survey-polls.json`` to copy any changed data to the database.
+
+Now I think I'm up to date here on the rectory computer.
+
+Copying the Data
+----------------
+
+I don't think I know how to copy the existing data from my activity models to the survey models so I think I will just
+type them in one by one again...
+
+I did a ``python manage.py runserver`` to start the local server and got into the admin page and noticed I need a Meta
+class on my SurveyMultiChoice and SurveyTrueFalse models to change their designations in the admin from "Survey multi
+choices" and "Survey true falses" to "Survey multiple choice items" and "Survey true/false items." I added
+``verbose_name = "<singular form of desired name>" to each.
+
+Using the Admin I created a new activity called "Life Issues Survey" and gave it a slug of "life_issues." I wrote up a
+new and improved overview, gave it the SurveyIcon.svg image, set today's date as the publish date and told it to close
+on December 31, 2018. Finally, I marked it as visible.
+
+Now that I have that activity in place I can recreate the former survey items...
+
+Upon trying to enter the first survey multiple choice item the admin gave me an error over the index entry. It said
+"Multiple choice item with this Index already exists. I haven't run into this problem before because I never tried to
+start a different activity. I think I can fix it by using ``unique_together`` but I need to study up on that first...
+
+It turns out that ``unique_together`` needs to be set on the underlying ``Item`` model, which makes it a lot easier than
+having to add it to all the individual models. Here's what I added to ``Item``'s Meta class:
+
+``unique_together = ("activity", "index")``
+
+That didn't do it. Time for more study...
+
+Ah! I hadn't done a ``makemigrations`` and a ``migrate`` before checking it.
+
+I did that, but it still didn't work on the item I had already entered. Let me try entering it again...
+
+It still doesn't work. Hmm...
+
+Ah! I had set the ``index`` field in the ``Item`` model with ``unique=True``. I have removed that, done a
+``makemigrations`` and a ``migrate`` and...
+
+It worked!
+
+Now to enter the other items...
+
+Done, however, inputs for the ``votes`` should not be appearing. I will check with the ``polls`` app to see how to handle
+this...
+
+Hmm..., the ``polls`` app did NOT handle this.
+
+After some looking around, and some experimentation, here is the version of ``survey.admin.py`` that works::
+
+    from django.contrib import admin
+    from .models import SurveyMultiChoice, SurveyChoice, SurveyTrueFalse, SurveyResponse
+
+
+    class SurveyChoiceInline(admin.StackedInline):
+        model = SurveyChoice
+        extra = 5
+        readonly_fields = ('votes',)
+
+    class SurveyMultiChoiceAdmin(admin.ModelAdmin):
+        inlines = [SurveyChoiceInline]
+
+
+    class SurveyTrueFalseAdmin(admin.ModelAdmin):
+        readonly_fields = ('true_count', 'false_count',)
+
+
+    admin.site.register(SurveyMultiChoice, SurveyMultiChoiceAdmin)
+    admin.site.register(SurveyTrueFalse, SurveyTrueFalseAdmin)
+
+Notice that the class ``SurveyTrueFalseAdmin`` had to be registered along with the model. Also, I suspect I could have
+made a ``SurveyChoiceAdmin`` class with the ``readonly_fields`` line, registered it, and had that work too, but why
+bother? Why add several lines when I only needed to add one? (I had actually tried something like that but I didn't know
+about registering the class.)
+
 
 

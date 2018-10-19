@@ -48,7 +48,7 @@ class Activity(models.Model):
 
 class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
-    index = models.SmallIntegerField(unique=True)
+    index = models.SmallIntegerField()
     title = models.CharField(max_length=25, null=True, blank=True)
     opinion = models.BooleanField(default=False)
     privacy_type = models.CharField(max_length=2,   # indicates privacy level of an item
@@ -63,6 +63,7 @@ class Item(models.Model):
     class Meta:
         ordering = ['index']
         abstract = True
+        unique_together = ("activity", "index")
 
     def previous(self):
         """
@@ -133,7 +134,7 @@ class TrueFalse(Item):
         return self.statement
 
     class Meta:
-        verbose_name = 'True or false item'
+        verbose_name = 'true/false item'
         ordering = ['index']
 
     def get_text(self):
