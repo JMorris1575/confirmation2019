@@ -491,3 +491,98 @@ Here is a chart of various apps and their duties as I now conceive them:
 
 This is also getting very complex. Perhaps I should keep what I have but create a separate ``survey`` app with models
 and views developed something like what is described for the ``status`` app above.
+
+Creating the Survey App
+=======================
+
+I have been thinking about it and it seems that I will need a new ``urls.py`` in this app as well as ``views.py`` to
+handle the new views. The ``models.py`` file will need to modify the already existing ``Choices`` model to include
+``votes``, the ``TrueFalse`` model to include ``true_votes`` and ``false_votes`` and perhaps I should add a ``SurveyMC``
+model just for completeness. The ``SurveyResponses`` model, subclassing ``Response``, can be available if I ever want
+to do a survey where the users are identified with their votes.
+
+I start with: ``python manage.py startapp survey``
+
+Right-clicking the new ``survey`` folder I added all its files to be tracked by Git.
+
+I created a ``urls.py`` file and added::
+
+    from django.urls import path
+    from django.contrib.auth.decorators import login_required
+    from django.views.generic import RedirectView
+    from .views import SurveySummaryView, SurveyDisplayView, SurveyItemView
+
+    app_name = 'survey'
+
+    urlpatterns = [
+        path('<slug:activity_slug>/summary/', login_required(SurveySummaryView.as_view()), name='survey_summary'),
+        path('<slug:activity_slug>/display/', login_required(SurveyDisplayView.as_view()), name='survey_display'),
+        path('<slug:activity_slug>/<int:item_index>/', login_required(SurveyItemView.as_view()), name='survey_item'),
+    ]
+
+I added empty view classes to be imported as shown above.
+
+I updated ``config.urls.py`` to include ``path('survey/', include('survey.urls')),``
+
+In ``survey.models.py`` I added::
+
+    from django.db import models
+    from activity.models import Item, MultiChoice, Choice, TrueFalse, Response
+
+    class SurveyItem(Item):
+        pass
+
+
+    class SurveyMultiChoice(MultiChoice):
+        pass
+
+
+    class SurveyChoice(Choice):
+        pass
+
+
+    class SurveyTrueFalse(TrueFalse):
+        pass
+
+
+    class SurveyResponse(Response):
+        pass
+
+Looking over these proposed models, however, I got to wondering if I really need a ``SurveyItem`` model in the models
+or if I need anything more than a ``SurveyItemView`` in the views. I will leave the doubtful classes empty as I begin
+to implement the ``survey`` app.
+
+Here is what I'm starting with for models::
+
+    class SurveyItem(Item):
+        pass
+
+
+    class SurveyMultiChoice(MultiChoice):
+        pass
+
+
+    class SurveyChoice(Choice):
+        votes = models.PositiveIntegerField(default=0)
+
+
+    class SurveyTrueFalse(TrueFalse):
+        true_count = models.PositiveIntegerField(default=0)
+        false_count = models.PositiveIntegerField(default=0)
+
+
+    class SurveyResponse(Response):
+        pass
+
+Just before leaving home for South Haven I completed the following:
+
+``python manage.py makemigrations`` -- Got ``No changes detected``
+
+``python manage.py migrate`` -- Got ``No migrations to apply``
+
+This is because I forgot to include ``survey`` in the ``InstalledApps``
+
+Now ``python manage.py makemigrations`` created my five new models.
+
+``python manage.py migrate`` applied survey.0001_initial. I added ``survey.0001_initial`` to git.
+
