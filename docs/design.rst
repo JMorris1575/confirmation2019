@@ -586,3 +586,13 @@ Now ``python manage.py makemigrations`` created my five new models.
 
 ``python manage.py migrate`` applied survey.0001_initial. I added ``survey.0001_initial`` to git.
 
+I did a commit called "Starting to create the survey app" and pushed my current commits to github.
+
+``python manage.py dumpdata auth.user activity survey polls > 2018-10-19-user-activity-survey-polls.json`` worked.
+
+I copied the resulting file to OneDrive for transfer to the rectory computer.
+
+Finally, I will do another commit and push to save the changes to this file.
+
+
+
