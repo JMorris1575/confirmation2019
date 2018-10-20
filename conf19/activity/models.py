@@ -61,9 +61,9 @@ class Item(models.Model):
         return self.activity.slug + ': ' + str(self.index)
 
     class Meta:
-        ordering = ['index']
-        abstract = True
         unique_together = ("activity", "index")
+        ordering = ['index']
+        # abstract = True
 
     def previous(self):
         """

@@ -679,5 +679,50 @@ made a ``SurveyChoiceAdmin`` class with the ``readonly_fields`` line, registered
 bother? Why add several lines when I only needed to add one? (I had actually tried something like that but I didn't know
 about registering the class.)
 
+Checking the Existing Pages
+---------------------------
 
+I think the welcome page should now list the new activity and the summary page should also display properly, but I can
+crash the program by trying to get into an item since there are no survey views as of yet...
 
+Hmm... that's interesting. It happened just as I said it would but, on the summary page, only items 2 through 7 were
+listed. Perhaps I entered it into the database incorrectly...
+
+Yes, I did, I entered it under the "Youth Survey" activity instead of the "Life Issues Survey" activity. Now all of the
+items appear on the summary page.
+
+But I noticed something else going on that I don't like. Since all of the Survey models subclass their counterparts in
+the ``activity`` app, they all appear in the ``activity`` app's list of items, either multiple choice or true/false. I
+don't like that.
+
+Also, I'm not sure the ``unique_together`` setting is working since it allowed me to have two multiple choice items
+under the "Youth Survey" activity with the same index at the same time. I will try to create another item under "Life
+Issues Survey" with a duplicated index...
+
+Unfortunately, it allowed me to enter it without a problem. Maybe it doesn't work when inherited...
+
+After thrashing around the internet I suspected the problem may have been that my Item class was an abstract class and
+so I removed that from the Item model's Meta class. Doing so, and running ``makemigrations`` worked by entering a number
+for ``item_ptr`` but I always entered the same number, 1, and when I tried to ``migrate`` it complained about the
+duplication.
+
+I might be able to fix all that manually but I think it will be easier to delete the database and start over...
+
+So I deleted/dropped the old database "Conf19," and created a new one "conf19." I had to change its name in the
+``secrets.json`` file too. I deleted all of the old migrations in activity, polls and survey and saved them to a
+temporary desktop folder just in case. I did a ``makemigrations`` and a ``migrate`` and THEN a ``createsuperuser``
+since, as I found out once again, a ``migrate`` has to create the auth.user part of the database before a
+superuser can be created.
+
+Now I can test it out by getting into the admin and entering some items with at least one duplicating the ``activity``
+and ``index``.
+
+It worked this time. I entered my first multi-choice item in the survey app tied to the "Life Issues Survey" activity.
+Then I entered the same thing in the activity app tied to the "Youth Survey" activity. Both were accepted, and both
+appeared in the activity app version which I still have to fix. When I went to the survey app and tried to enter a new
+item with index=1 into the "Youth Survey" activity the admin gave me an appropriate error message saying I couldn't
+duplicate both items.
+
+Next I need to finish entering the data after figuring out what to do about the duplication of items in the admin. I
+think the best bet is to create a base_models activity and put the models I want to inherit in there but not to register
+them in the admin. We'll see how that works on another day.
