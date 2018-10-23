@@ -1,48 +1,16 @@
-{% extends parent_template|default:"activity/base-activity.html" %}
-
-{% block title %}
-    {{ block.super }}|Multi-Choice Response
-{% endblock %}
-
-{% block item-content %}
-    Response = {{ response }}
-    {% if not response %}
-        <form action="{% url 'activity:item' item.activity.slug item.index %}" method="post">
-            {% csrf_token %}
-            {% if error_message %}
-                <h3 class="text-danger">{{ error_message }}</h3>
-            {% endif %}
-            {% for choice in choices %}
-                <div class="form-check ml-3 ml-sm-5 my-4">
-                    <h4>
-                        <input class="form-check-input mt-2" type="radio" name="choice"
-                               value="{{ forloop.counter }}" id="radio{{ forloop.counter }}">
-                        <label class="form-check-label" for="radio{{ forloop.counter }}">{{ choice }}</label>
-                    </h4>
-                </div>
-            {% endfor %}
-            <div class=" row justify-content-center">
-                <input class="btn btn-outline-primary btn-lg" value="Submit Response" type="submit"/>
-            </div>
-        </form>
-    {% else %}
-        {% with response.multi_choice as multi_choice %}
-            <p>
-                You answered {{ multi_choice }}
-            </p>
-            {% if item.reveal_answer %}
-                {% if response.correct %}
-                    <p>That is correct!</p>
-                {% else %}
-                    <p>Sorry! That is not correct.</p>
-                    <p>The correct answer is: {{ multi_choice.correct_choice }}</p>
-                {% endif %}
-                {% if item.explanation != '' %}
-                    <p>{{ item.explanation }}</p>
-                {% endif %}
-            {% else %}
-                {% include 'activity/edit-delete.html' %}
-            {% endif %}
-        {% endwith %}
+    {% csrf_token %}
+    {% if error_message %}
+        <h3 class="text-danger">{{ error_message }}</h3>
     {% endif %}
-{% endblock %}
+    {% for choice in choices %}
+        <div class="form-check ml-3 ml-sm-5 my-4">
+            <h4>
+                <input class="form-check-input mt-2" type="radio" name="choice"
+                       value="{{ forloop.counter }}" id="radio{{ forloop.counter }}">
+                <label class="form-check-label" for="radio{{ forloop.counter }}">{{ choice }}</label>
+            </h4>
+        </div>
+    {% endfor %}
+    <div class=" row justify-content-center">
+        <input class="btn btn-outline-primary btn-lg" value="Submit Response" type="submit"/>
+    </div>

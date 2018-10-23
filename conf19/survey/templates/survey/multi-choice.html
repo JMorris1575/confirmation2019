@@ -1,0 +1,33 @@
+{% extends parent_template|default:"activity/base-activity.html" %}
+
+{% block title %}
+    {{ block.super }}|Multi-Choice Response
+{% endblock %}
+
+{% block item-content %}
+    Response = {{ response }}
+    {% if not response %}
+        <form action="{% url 'survey:survey_item' item.activity.slug item.index %}" method="post">
+            {% include 'activity/multi-choice.html' %}
+        </form>
+    {% else %}
+        {% with response.multi_choice as multi_choice %}
+            <p>
+                You answered {{ multi_choice }}
+            </p>
+            {% if item.reveal_answer %}
+                {% if response.correct %}
+                    <p>That is correct!</p>
+                {% else %}
+                    <p>Sorry! That is not correct.</p>
+                    <p>The correct answer is: {{ multi_choice.correct_choice }}</p>
+                {% endif %}
+                {% if item.explanation != '' %}
+                    <p>{{ item.explanation }}</p>
+                {% endif %}
+            {% else %}
+                {% include 'activity/edit-delete.html' %}
+            {% endif %}
+        {% endwith %}
+    {% endif %}
+{% endblock %}

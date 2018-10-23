@@ -57,7 +57,7 @@
                                                     ''
                                                 {% elif progress == 'Up next...' %}
                                                     <a class="btn btn-outline-primary btn-lg btn-block py-1"
-                                                       href="/activity/{{ activity.slug }}/{{ item.index }}/">
+                                                       href="/{{ item.get_item_type_display }}/{{ activity.slug }}/{{ item.index }}/">
                                                         Do it...
                                                     </a>
                                                 {% else %}
