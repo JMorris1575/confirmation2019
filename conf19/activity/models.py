@@ -226,4 +226,4 @@ class Completed(models.Model):
     last_edited = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.activity) + " completed by: " + self.user.first_name + ' ' + self.user.last_name
+        return str(self.activity) + ' ' + str(self.index) + " completed by: " + self.user.first_name + ' ' + self.user.last_name

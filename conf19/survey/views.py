@@ -37,7 +37,7 @@ class SurveyItemView(View):
         if type(item) == MultiChoice:
             choices = item.choice_set.all()
             try:
-                selected_choice = int(request.POST['choice'])
+                selected_choice = choices[int(request.POST['choice'])]
             except (KeyError, Choice.DoesNotExist):
                 self.template_name = 'survey/multi-choice.html'
                 context = {'activity':item.activity, 'item':item, 'choices':choices, 'response':None}
@@ -48,17 +48,14 @@ class SurveyItemView(View):
                 completed = Completed(user=request.user, activity=activity, index=item_index)
                 completed.save()
                 if item.privacy_type == 'AN':
-                    user = User.objects.get(username='Anonymous')
-                    response = Response(user=user, activity=activity, index=item_index,
-                                        multi_choice=selected_choice)
-                    response.save()
-                    # need to render the next page if available
+                    # only need to count the votes
+                    selected_choice.votes += 1
+                    selected_choice.save()
                 else:
                     response = Response(user=request.user, activity=activity, index=item_index,
                                         multi_choice=selected_choice)
-                if not item.opinion:
-                    response.correct = selected_choice.correct
-                response.save()
+                    response.save()
+        # need to render the next page if available rather than redirecting back to the same page
         return redirect('survey:survey_item', activity_slug, item_index)
 
 
