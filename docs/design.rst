@@ -615,7 +615,7 @@ type them in one by one again...
 I did a ``python manage.py runserver`` to start the local server and got into the admin page and noticed I need a Meta
 class on my SurveyMultiChoice and SurveyTrueFalse models to change their designations in the admin from "Survey multi
 choices" and "Survey true falses" to "Survey multiple choice items" and "Survey true/false items." I added
-``verbose_name = "<singular form of desired name>" to each.
+``verbose_name = "<singular form of desired name>"`` to each.
 
 Using the Admin I created a new activity called "Life Issues Survey" and gave it a slug of "life_issues." I wrote up a
 new and improved overview, gave it the SurveyIcon.svg image, set today's date as the publish date and told it to close
@@ -726,3 +726,144 @@ duplicate both items.
 Next I need to finish entering the data after figuring out what to do about the duplication of items in the admin. I
 think the best bet is to create a base_models activity and put the models I want to inherit in there but not to register
 them in the admin. We'll see how that works on another day.
+
+Using Abstract Base Models in a Separate App
+============================================
+
+I'm going to experiment with abstract base classes
+(see: https://docs.djangoproject.com/en/2.1/topics/db/models/#model-inheritance) even though that will mean destroying
+and recreating my database possibly several times. Here's the plan:
+
+#. Create an app called ``base_models`` and add it to InstalledApps. (``python manage.py startapp base_models``)
+#. Add its files to the git repository. (PyCharm right-click ``base_models`` select git->add)
+#. Add the following models to ``base_models.models.py``: ItemBase, MultiChoiceBase and TrueFalseBase, each with
+   ``abstract = True`` in their Meta classes and otherwise be like what they are now.
+#. In ``activity.models.py`` ActivityMultiChoice and ActivityTrueFalse will inherit from their respective base models.
+   Each will have ``unique_together = (activity, index)`` in their Meta classes, which are to inherit from <class>.Meta.
+#. In ``survey.models.py`` SurveyMultiChoice and SurveyTrueFalse will inherit from their respective base models. Each
+   will have ``unique_together = (activity, index)`` in their Meta classes, which are to inherit from <class>.Meta.
+#. Make the necessary edits to ``activity/admin.py`` and ``survey/admin.py``.
+#. Delete/Drop the current conf19 database in PgAdmin4 and recreate it with Jim as the owner.
+#. Delete all migration files.
+#. Perform a ``makemigrations`` and a ``migrate`` command and add yourself as the superuser. (``createsuperuser``)
+#. Test whether or not you can create two items with the same activity and index.
+#. Check to see whether the display page still works.
+#. Devise some kind of test to see if the ``next()`` method in ItemBase actually works. (It seems it will not have
+   anything to count near line 44: ``max = len(ItemBase.objects.filter(activity=self.activity))``.)
+
+Because of a circular import problem I ended up putting my base classes back in the activity app -- just after the
+required definition of the Activity model itself.
+
+Subclassing MultiChoiceBase and TrueFalseBase, which themselves subclass ItemBase, did not prevent me from entering
+multiple items with the same acivity and index. Next try subclassing ItemBase directly in the Activity and Survey
+MultiChoice classes.
+
+No! First make sure all of the Meta classes in the subclasses are inheriting the Meta classes of their respective
+parents.
+
+A Clarification of Thinking
+---------------------------
+
+I spent a lot of time trying to make sure that if I entered an item with the same activity and index in one app it would
+prevent me from entering an item with that same activity and index in another. I wasn't thinking clearly. I don't think
+I need to worry about a conflict between Items in apps that use the same activity and index numbers. Let me try to think
+this through...
+
+If I have an ActivityMultiChoice question associated with the Life Issues activity and a SurveyMultiChoice question
+associated with the same Life Issues activity and the same index number, the responses will be held in each app's
+Responses model. There would only be a problem if I was still trying to record all the responses in one shared
+Responses model. Having separate Responses models for each app alleviates that problem.
+
+It does seem strange that I can have two different apps using the same activity. I'm trying to think of the activity app
+as the main app, it displays all of the available activities and summarizes the user's activity on each. It seems that
+an activity should be able to have items from different apps. For instance, in an instructional activity (is that a new
+app I should be thinking of creating?) there may be some survey questions. That should be allowed. As long as any one
+activity doesn't get items with the same index there should not be a conflict.
+
+Nope! There may be a problem with associated items, if that's what you call it. I'm not sure item.response_set is
+going to work to determine the responses the user has made. Maybe it's "CompletedBy" that is the problem. I definitely
+need to think about this some more!
+
+Rethinking my Thinking
+======================
+
+What is the easier way to structure this program? Should I try, as before, to throw all, or at least most, of the
+functionality into the activity app? Or should I, as most recently, try to create more support apps to handle each kind
+of activity? There is also the possibility of creating an app for each kind of item, be it multiple choice, true/false,
+discussion, essay, or just a set of instructions. Then there is the help system. Should that be a separate app too?
+
+If the activity app is to be the controller, so to speak, it seems that most of the functionality should go there and it
+should call on the other apps as needed. Should there be an item app to hold the base classes and the item
+functionality? Is that the sensible place to keep track of the responses?
+
+Should each item identify itself as to what sort of item it is, i.e. which app it goes to? That would seem to violate
+some principle having to do with apps being as independent as possible for reusability.
+
+Or perhaps I'm making more trouble out of this than needs to be there. Maybe I just need to rethink how the user
+responses are stored and identified. If I keep my current app structure: Activity, Survey, (Discussion), etc. what is
+the best way to keep track of user responses given that any one activity may have a variety of item types. If the item
+type is stored with the item that would facilitate getting response information for that item from the proper Response
+model. If, on the other hand, I used just one Response model in the activity app, I would have to be careful about
+making sure each item DID have just one activity and item number. Perhaps I would need to include the ``item_type``
+field in the ``unique_together`` Meta entry.  Something tells me, again, I should diagram the problem but I don't know
+what sort of diagram to draw. The ones I've seen in the past haven't helped me visualize things very well but I also
+don't know how to use the diagrams I've seen before -- what is the meaning of the arrows for instance?
+
+Making a Diagram of the Models
+------------------------------
+
+I followed the instructions at https://django-extensions.readthedocs.io/en/latest/graph_models.html, installed
+django-extensions (``pip install django-extensions``) and pydot (``pip install pyparsing pydot``) and the examples at
+the bottom of the page to create a .png file with the diagram of my models as they currently stand. I opened them in
+GIMP and printed them to the Epson ET-3600 and used its multi-page option to create a 3 * 3 poster.
+
+Maybe it helped. While looking at it I began to wonder whether I really needed all that complexity. Perhaps I can have
+just one set of models and use different apps to deal with them in different ways. Which apps? Where should the models
+be? Here are some thoughts:
+
+#. Possible apps: survey, action, discussion, keeping all the models in the activity app.
+#. Have an app for each type of item: multi-choice, true/false, discussion, essay, explanation, etc. and then have
+   other apps which use those apps to serve their different purposes: survey, discussion, instruction. [I can already
+   see how this would be dumb. Too complex.]
+#. Using the first option above, the item itself would identify its type and determine which app would be used.
+#. This implies a different url scheme than I think I have used before, something like
+   activity/<activity_slug>/<item_type>/<n>
+
+I think I like that idea, the models are much simplified and each app's views would only have to worry about their own
+kind of processing.
+
+Another New Approach
+====================
+
++--------------------+--------------------+----------------------------------------------------------------------+
+|      App Name      |       Models       | Notes:                                                               |
++====================+====================+======================================================================+
+| activity           | Image              | The **activity** app manages and displays the overall operation of   |
+|                    | Activity           | the program. It manages the welcome page with its list of activities,|
+|                    | ItemBase           | each activity's summary page showing the user's current progress and |
+|                    | MultiChoice        | provides a means of entering each acivity. It may also display       |
+|                    | TrueFalse          | reports to the leaders of the candidate's activities.                |
+|                    | Essay              |                                                                      |
+|                    | Discussion         |                                                                      |
+|                    | Explanation        |                                                                      |
+|                    | CompletedBy        |                                                                      |
+|                    | Response           |                                                                      |
++--------------------+--------------------+----------------------------------------------------------------------+
+| survey             | none               | The **survey** app manages and displays survey items. These are      |
+|                    |                    | always optional and may eliminate the "opinion" field in the item    |
+|                    |                    | models. The MultiChoice and TrueFalse models will each have to have  |
+|                    |                    | "vote" fields to be used by the **survey** app.                      |
++--------------------+--------------------+----------------------------------------------------------------------+
+| action             | none               | The **action** app manages items that have right and wrong answers or|
+|                    |                    | involve some action for the users to perform.                        |
++--------------------+--------------------+----------------------------------------------------------------------+
+| discussion         | none               | The **discussion** app allows for more than one rresponse to the same|
+|                    |                    | item. In all but an anonymous discussion, users should be allowed to |
+|                    |                    | edit their earlier entries.                                          |
++--------------------+--------------------+----------------------------------------------------------------------+
+
+I think that gives me enough to get started.
+
+
+
+

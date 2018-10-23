@@ -20,4 +20,7 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static', 'site'), )
 
-
+GRAPH_MODELS = {
+    'all_applications': True,
+    'group_models': True,
+}

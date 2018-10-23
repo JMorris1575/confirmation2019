@@ -20,6 +20,14 @@ def get_items(activity):
     tf_list = list(tf)
     return list(merge(mc_list, tf_list, key=get_index))
 
+
+# +-----------------------------+
+# |                             |
+# | Prerequisite Models Section |
+# |                             |
+# +-----------------------------+
+
+
 class Image(models.Model):
     filename = models.CharField(max_length=30)
     category = models.CharField(max_length=20)
@@ -46,11 +54,22 @@ class Activity(models.Model):
         verbose_name_plural = 'activities'
 
 
+# +------------------------------+
+# |                              |
+# | Abstract Base Models Section |
+# |                              |
+# +------------------------------+
+
+
 class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField()
     title = models.CharField(max_length=25, null=True, blank=True)
-    opinion = models.BooleanField(default=False)
+    item_type = models.CharField(max_length=2,  # indicates the type of this item
+                                 choices=[('AC', 'action'),     # item belongs to the action app
+                                          ('DI', 'discuss'),    # Item belongs to the discussion app
+                                          ('SU', 'survey')],    # Item belongs to the survey app
+                                 default = 'AC')
     privacy_type = models.CharField(max_length=2,   # indicates privacy level of an item
                                  choices=[('OP', 'Open'),               # responder able to be openly published
                                           ('SA', 'Semi-Anonymous'),     # responder only visible to team members
@@ -58,37 +77,39 @@ class Item(models.Model):
                                  default='OP')
 
     def __str__(self):
-        return self.activity.slug + ': ' + str(self.index)
+        return self.activity.slug + '/' + self.get_item_type_display() + '/' + str(self.index)
 
     class Meta:
-        unique_together = ("activity", "index")
         ordering = ['index']
-        # abstract = True
+        abstract = True
+        unique_together = ('activity', 'index')
 
     def previous(self):
         """
         Returns the previous page if there is one, otherwise returns None
-        :return: '/activity/<activity_slug>/<item_index>/ or None
+        :return: '/activity/<activity_slug>/<item_type>/<item_index>/ or None
         """
         index = self.index
         slug = self.activity.slug
+        item_type = self.get_item_type_display()
         if index == 1:
             return None
         else:
-            return '/activity/' + slug + '/' + str(index - 1) + '/'
+            return '/activity/' + slug + '/' + item_type + '/' + str(index - 1) + '/'
 
     def next(self):
         """
         Returns the next item if there is one, otherwise returns None
-        :return: '/activity/<activity_slug>/<page_index>/ or None
+        :return: '/activity/<activity_slug>/<item_type>/<page_index>/ or None
         """
         index = self.index
         slug = self.activity.slug
+        item_type = self.get_item_type_display()
         max = len(Item.objects.filter(activity=self.activity))
         if index == max:
             return None
         else:
-            return '/activity/' + slug + '/' + str(index + 1) + '/'
+            return '/activity/' + slug + '/' + item_type + '/' + str(index + 1) + '/'
 
 
 class MultiChoice(Item):
@@ -97,9 +118,9 @@ class MultiChoice(Item):
     def __str__(self):
         return Truncator(self.text).words(5)
 
-    class Meta:
-        verbose_name = 'multiple choice item'
+    class Meta(Item.Meta):
         ordering = ['index']
+
 
     def get_text(self):
         return self.text
@@ -108,7 +129,7 @@ class MultiChoice(Item):
         return self.choice_set
 
     def get_subtext(self):
-        choices = Choice.objects.filter(multi_choice=self)
+        choices = self.get_choices
         subtext = []
         for choice in choices:
             subtext.append(choice.text)
@@ -119,6 +140,7 @@ class Choice(models.Model):
     multi_choice = models.ForeignKey(MultiChoice, on_delete=models.CASCADE)
     text = models.CharField(max_length=256)
     correct = models.BooleanField(blank=True)
+    votes = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.text
@@ -126,15 +148,17 @@ class Choice(models.Model):
     class Meta:
         ordering = ['pk']
 
+
 class TrueFalse(Item):
     statement = models.CharField(max_length=512)
     correct_answer = models.BooleanField(null=True, blank=True)
+    true_count = models.PositiveIntegerField(default=0)
+    false_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.statement
 
-    class Meta:
-        verbose_name = 'true/false item'
+    class Meta(Item.Meta):
         ordering = ['index']
 
     def get_text(self):
@@ -155,7 +179,7 @@ class Response(models.Model):
     true_false = models.BooleanField(default=False)
     correct = models.NullBooleanField(null=True)
 
-    class Meta():
+    class Meta:
         ordering = ['user']
 
     def __str__(self):
@@ -191,16 +215,15 @@ class Response(models.Model):
         return self.completed
 
 
-class CompletedBy(models.Model):
+class Completed(models.Model):
     """
     Records whether the user has responded to a particular item
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField()
-    response = models.OneToOneField(Response, on_delete=models.CASCADE, null=True, blank=True, default=None)
     created = models.DateTimeField(auto_now_add=True)
     last_edited = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "Completed by: " + self.user.first_name + ' ' + self.user.last_name
+        return str(self.activity) + " completed by: " + self.user.first_name + ' ' + self.user.last_name

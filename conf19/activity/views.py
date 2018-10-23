@@ -4,7 +4,7 @@ from django.views import View
 
 import datetime
 
-from .models import Activity, MultiChoice, Choice, CompletedBy, Response, get_items
+from .models import Activity, MultiChoice, Choice, Completed, Response, get_items
 
 class WelcomeView(View):
     template_name = 'activity/welcome.html'
@@ -17,7 +17,7 @@ class WelcomeView(View):
         for activity in activities:
             items = get_items(activity)
             item_count = len(items)
-            completed = len(CompletedBy.objects.filter(user=request.user, activity=activity))
+            completed = len(Completed.objects.filter(user=request.user, activity=activity))
             if item_count != 0:
                 percent_completed = completed/item_count * 100
                 if percent_completed < 100:
@@ -37,7 +37,7 @@ class SummaryView(View):
     def get(self, request, activity_slug):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
-        completed = CompletedBy.objects.filter(user=request.user, activity=activity.pk)
+        completed = Completed.objects.filter(user=request.user, activity=activity.pk)
         data = []
         first_pass = True                          # this changes as soon as an incomplete page is found
         for item in items:
@@ -68,7 +68,7 @@ class ItemView(View):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
         item = items[item_index - 1]
-        completed = CompletedBy.objects.filter(user=request.user, activity=activity, index=item.index)
+        completed = Completed.objects.filter(user=request.user, activity=activity, index=item.index)
         responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
         try:
             response = Response.objects.get(user=request.user, activity=activity, index=item_index)
@@ -94,8 +94,8 @@ class ItemView(View):
                 context['error_message'] = 'You must choose one of the responses below.'
                 return render(request, self.template_name, context)
             # make sure this user hasn't already responded to this item
-            if len(CompletedBy.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
-                completed_by = CompletedBy(user=request.user, activity=activity, index=item_index)
+            if len(Completed.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
+                completed_by = Completed(user=request.user, activity=activity, index=item_index)
                 completed_by.save()
                 if item.privacy_type == 'AN':
                     user = User.objects.get(username='Anonymous')
