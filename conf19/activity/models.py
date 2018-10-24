@@ -105,11 +105,11 @@ class Item(models.Model):
         index = self.index
         slug = self.activity.slug
         item_type = self.get_item_type_display()
-        max = len(Item.objects.filter(activity=self.activity))
+        max = len(get_items(self.activity))
         if index == max:
             return None
         else:
-            return '/activity/' + slug + '/' + item_type + '/' + str(index + 1) + '/'
+            return index + 1
 
 
 class MultiChoice(Item):

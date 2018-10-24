@@ -55,7 +55,9 @@ class SurveyItemView(View):
                     response = Response(user=request.user, activity=activity, index=item_index,
                                         multi_choice=selected_choice)
                     response.save()
-        # need to render the next page if available rather than redirecting back to the same page
+
+        next_page = item.next()
+        print('next_page = ', next_page)
         return redirect('survey:survey_item', activity_slug, item_index)
 
 
