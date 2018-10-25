@@ -6,7 +6,7 @@
 
 {% block item-content %}
     {% if not completed %}
-        <form action="{% url 'survey:survey_item' item.activity.slug item.index %}" method="post">
+        <form action="{% url 'survey:item' item.activity.slug item.index %}" method="post">
             {% include 'activity/true-false.html' %}
         </form>
     {% endif %}

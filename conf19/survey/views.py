@@ -87,15 +87,35 @@ class SurveyItemView(View):
                                         index=item_index, true_false=selected_response=='true')
                     response.save()
 
-        print('item_index = ', item_index)
         next_item_index = item.next()
-        print('next_item_index = ', next_item_index)
         if next_item_index:
-            print('items = ', items)
             new_item = items[next_item_index - 1]
-            return redirect('/' + new_item.get_item_type_display() + '/' + activity_slug + '/' + str(next_item_index) + '/')
+            return redirect('/' + new_item.get_app_name_display() + '/' + activity_slug + '/' + str(next_item_index) + '/')
         else:
             return redirect('activity:welcome')
 
 
+class SurveyReportView(View):
+
+    def get(self, request, activity_slug, item_index):
+        activity = Activity.objects.get(slug=activity_slug)
+        items = get_items(activity)
+        item = items[item_index - 1]
+        context = {'user':request.user, 'item':item}
+        if type(item) == MultiChoice:
+            self.template_name = 'survey/multi-choice-report.html'
+            choices = item.choice_set.all()
+            context['choices'] = choices
+        elif type(item) == TrueFalse:
+            self.template_name = 'survey/true-false-report.html'
+            total = item.true_count + item.false_count
+            if total != 0:
+                percent_true = round(item.true_count * 100 / total)
+                percent_false = round(item.false_count * 100 / total)
+            else:
+                percent_true = 0
+                percent_false = 0
+            context['percent_true'] = percent_true
+            context['percent_false'] = percent_false
+        return render(request, self.template_name, context)
 

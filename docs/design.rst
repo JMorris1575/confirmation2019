@@ -515,9 +515,9 @@ I created a ``urls.py`` file and added::
     app_name = 'survey'
 
     urlpatterns = [
-        path('<slug:activity_slug>/summary/', login_required(SurveySummaryView.as_view()), name='survey_summary'),
-        path('<slug:activity_slug>/display/', login_required(SurveyDisplayView.as_view()), name='survey_display'),
-        path('<slug:activity_slug>/<int:item_index>/', login_required(SurveyItemView.as_view()), name='survey_item'),
+        path('<slug:activity_slug>/summary/', login_required(SurveySummaryView.as_view()), name='summary'),
+        path('<slug:activity_slug>/display/', login_required(SurveyDisplayView.as_view()), name='display'),
+        path('<slug:activity_slug>/<int:item_index>/', login_required(SurveyItemView.as_view()), name='item'),
     ]
 
 I added empty view classes to be imported as shown above.
@@ -864,6 +864,105 @@ Another New Approach
 
 I think that gives me enough to get started.
 
+Evaluation of the New Approach
+------------------------------
 
+This seems to be going well. Each item type has its own app to deal with its own needs. It should also make it easier to
+add new item types, such as an implementation of the Chosen "Challenge of the Week" that was giving me trouble last
+year.
 
+I do think I need some different names for things, though. The fieldname ``item_type`` is confusing since it could also
+refer to the various model types, such as MultiChoice and TrueFalse. I think ``item_app`` makes a better name, or just
+``app``.
 
+Similarly, it doesn't seem necessary to have the survey urlconfs named with a prefix of ```` when they will need
+to be referred to as ``survey.<urlconf_name>`` or ``survey:<urlconf_name``.
+
+Finally, my yet-to-be-created ``action`` app needs a better name. The purpose of the items in this app are to kind of
+take place of a classroom instructional experience. Or maybe it's more like homework. The candidates come in, do
+different things and, hopefully, go away with something they didn't have before, either knowledge or experience. I'm
+thinking the best name for this is already taken: **activity** and the best name for the current ``activity`` app would
+be something along the lines of ``manager``.
+
+That seems like a major refactoring just to change the names but it should be worth it if it helps to clarify my
+thinking and my understanding of the program when I come back to it after being away for a while. Hopefully, PyCharm's
+refactor will deal with most of the difficulties.
+
+Refactoring to Change Names
+---------------------------
+
+Might as well start with the most complicated one: the ``activity`` app. Right-clicking on the ``activity`` folder gives
+me a context menu including ``Refactor->Rename...``. I did that and, looking over the preview, I wondered about
+changing the name of the ``Activity`` model. That DOES seem to be properly named since everything the candidates do on
+the site are activities. Maybe I'll hold off on renaming the ``activity`` app and go after the lower-hanging fruit.
+
+I thought eliminating the ``survey_`` prefix wouldn't be a big problem using ``Refactor->Rename...`` but that doesn't
+work. The prefix is in a string so I guess I'll try ``Edit->Find->Replace...`` instead. [It worked, but not as easily as
+I think it should. It only seems capable of serching through one file at a time. ... The Edit menu has entries:
+``Find in path`` and ``Replace in path`` for this.]
+
+I decided to change ``item_type`` to ``app_name`` and also had to change references to ``item.get_item_type_display`` to
+``item.get_app_name_display``.
+
+I originally forgot to do a ``makemigrations`` and a ``migrate`` after this and got some errors. When I tried the
+``makemigrations`` it couldn't detect any changes -- though the ``0001_initial.py`` migration file had the correct
+fieldname in both the MultiChoice and TrueFalse models. I finally had to delete all the migrations, and delete and
+recreate the database (again!).
+
+I'll leave the name for the name of the ``action`` app the same for now, it still doesn't exist after all. Perhaps I
+will come up with a better name when I actually create it.
+
+Adding Reports
+==============
+
+The ``survey`` app should be able to give reports to the leaders. The url for this can be:
+
+``/survey/<activity_slug>/<item_index>/report/``
+
+or maybe:
+
+``/survey/report/<activity_slug>/<item_index>/``.
+
+I don't know why, exactly, but the second one seems to make more sense to me.
+
+It should only be available to team members so I will have to check last year's version to see how to do that again.
+
+It will require a new view, I'll call it ``SurveyReportView`` which will only need a ``get()`` method.
+
+It will also require a new item in the menu that will be visible only for staff.
+
+I'm thinking of implementing it with those bootstrap bar-graph things I've seen.
+
+First Steps to Adding Reports
+-----------------------------
+
+Create a new urlconf in the ``survey`` app that contains ``/survey/report/<activity_slug>/<item_index>/``.
+
+Write ``SurveyReportView`` with its ``get()`` method.
+
+Write ``survey/multi-choice-report.html``
+
+Write ``survey/true-false-report.html``
+
+Study and use bootstrap's Progress component.
+
+Adding Previous and Next Buttons
+--------------------------------
+
+First I will study Django's version of this to see if it will help.
+
+I looked into using the Paginator module(?) but, at this point, I don't see that it would help. It is designed, it seems
+to me, to present lists of fairly brief information. Maybe it could be used on the summary page for an activity that
+has a very large group of items, but for moving from one detail page to the next I think I'd rather create my own
+buttons.
+
+Last year I had a ``navigation.html`` page in the main sites set of templates. The ``href`` for both the Back and Next
+buttons needed the output of the ``Item.previous()`` and ``Item.next()`` methods to return an actual url. This year, so
+far, I have them returning the previous or next index. Changing that will affect the last part of the ``post()`` method
+of the ``SurveyItemView`` but I think it can be done.
+
+Creating a Working Menu System
+------------------------------
+
+Before I create a link to the report system I want to at least stub in the help system. For now I will just create an
+html page telling the user, sadly, that there isn't a help system yet.

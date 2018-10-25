@@ -15,6 +15,7 @@ def get_items(activity):
         return x.index
 
     mc = activity.multichoice_set.all()
+    print('mc = ', mc)
     mc_list = list(mc)
     tf = activity.truefalse_set.all()
     tf_list = list(tf)
@@ -65,11 +66,11 @@ class Item(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     index = models.SmallIntegerField()
     title = models.CharField(max_length=25, null=True, blank=True)
-    item_type = models.CharField(max_length=2,  # indicates the type of this item
-                                 choices=[('AC', 'action'),     # item belongs to the action app
-                                          ('DI', 'discuss'),    # Item belongs to the discussion app
-                                          ('SU', 'survey')],    # Item belongs to the survey app
-                                 default = 'AC')
+    app_name = models.CharField(max_length=2,  # indicates the type of this item
+                                choices=[('AC', 'action'),     # item belongs to the action app
+                                         ('DI', 'discuss'),    # Item belongs to the discussion app
+                                         ('SU', 'survey')],  # Item belongs to the survey app
+                                default = 'AC')
     privacy_type = models.CharField(max_length=2,   # indicates privacy level of an item
                                  choices=[('OP', 'Open'),               # responder able to be openly published
                                           ('SA', 'Semi-Anonymous'),     # responder only visible to team members
@@ -77,7 +78,7 @@ class Item(models.Model):
                                  default='OP')
 
     def __str__(self):
-        return self.activity.slug + '/' + self.get_item_type_display() + '/' + str(self.index)
+        return self.activity.slug + '/' + self.get_app_name_display() + '/' + str(self.index)
 
     class Meta:
         ordering = ['index']
@@ -86,25 +87,21 @@ class Item(models.Model):
 
     def previous(self):
         """
-        Returns the previous page if there is one, otherwise returns None
-        :return: '/activity/<activity_slug>/<item_type>/<item_index>/ or None
+        Returns the previous item index if there is one, otherwise returns None
+        :return: int or None
         """
         index = self.index
-        slug = self.activity.slug
-        item_type = self.get_item_type_display()
         if index == 1:
             return None
         else:
-            return '/activity/' + slug + '/' + item_type + '/' + str(index - 1) + '/'
+            return index - 1
 
     def next(self):
         """
-        Returns the next item if there is one, otherwise returns None
-        :return: '/<item_type>/<activity_slug>/<item_type>/<page_index>/ or None
+        Returns the next item index if there is one, otherwise returns None
+        :return: int or None
         """
         index = self.index
-        slug = self.activity.slug
-        item_type = self.get_item_type_display()
         max = len(get_items(self.activity))
         if index == max:
             return None
@@ -126,14 +123,21 @@ class MultiChoice(Item):
         return self.text
 
     def get_choices(self):
-        return self.choice_set
+        return self.choice_set.all()
 
     def get_subtext(self):
-        choices = self.get_choices
+        choices = self.get_choices()
         subtext = []
         for choice in choices:
             subtext.append(choice.text)
         return subtext
+
+    def total_votes(self):
+        choices = self.get_choices()
+        total = 0
+        for choice in choices:
+            total += choice.votes
+        return total
 
 
 class Choice(models.Model):
@@ -147,6 +151,13 @@ class Choice(models.Model):
 
     class Meta:
         ordering = ['pk']
+
+    def percent_of_total(self):
+        total = self.multi_choice.total_votes()
+        if total != 0:
+            return round(self.votes * 100/total)
+        else:
+            return 0        # return zero if there have been no votes
 
 
 class TrueFalse(Item):

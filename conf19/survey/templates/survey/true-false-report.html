@@ -1,0 +1,29 @@
+{% extends parent_template|default:"activity/base-activity.html" %}
+
+{% block title %}
+    {{ block.super }}|Multi-Choice Report
+{% endblock %}
+
+{% block item-content %}
+    <ul class="list-group ml-3 ml-sm-5 my-4">
+        <h4>
+            <li class="list-group-item">
+                <div>True</div>
+                <div class="progress">
+                    <div class="progress-bar" style="width: {{ percent_true }}%">
+                        {{ percent_true }}%
+                    </div>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <div>False</div>
+                <div class="progress">
+                    <div class="progress-bar" style="width: {{ percent_false }}%">
+                        {{ percent_false }}%
+                    </div>
+                </div>
+            </li>
+        </h4>
+    </ul>
+
+{% endblock %}
