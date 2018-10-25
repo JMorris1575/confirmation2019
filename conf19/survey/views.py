@@ -18,8 +18,11 @@ class SurveyItemView(View):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
         item = items[item_index - 1]
-        completed = Completed.objects.filter(user=request.user, activity=activity, index=item.index)
-        responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
+        try:
+            completed = Completed.objects.get(user=request.user, activity=activity, index=item.index)
+        except Completed.DoesNotExist:
+            completed = None
+        # responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
         try:
             response = Response.objects.get(user=request.user, activity=activity, index=item_index)
         except Response.DoesNotExist:
@@ -27,13 +30,18 @@ class SurveyItemView(View):
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice.html'
             choices = item.choice_set.all()
-            context = {'user': request.user, 'response': response, 'item': item, 'choices': choices}
+            context = {'user': request.user, 'completed': completed, 'response': response,
+                       'item': item, 'choices': choices}
+        elif type(item) == TrueFalse:
+            self.template_name = 'survey/true-false.html'
+            context = {'user': request.user, 'completed': completed, 'response': response, 'item': item}
 
         return render(request, self.template_name, context)
 
     def post(self, request, activity_slug, item_index):
         activity = Activity.objects.get(slug=activity_slug)
-        item = get_items(activity)[item_index-1]
+        items = get_items(activity)
+        item = items[item_index - 1]
         if type(item) == MultiChoice:
             choices = item.choice_set.all()
             try:
@@ -55,10 +63,23 @@ class SurveyItemView(View):
                     response = Response(user=request.user, activity=activity, index=item_index,
                                         multi_choice=selected_choice)
                     response.save()
+        elif type(item) == TrueFalse:
+            try:
+                selected_response = request.POST['choice']
+            except (KeyError):
+                self.template_name = 'survey/true-false.html'
+                context = {'activity':item.activity, 'item':item}
+                context['error_message'] = 'You must select either True or False.'
+                return render(request, self.template_name, context)
 
-        next_page = item.next()
-        print('next_page = ', next_page)
-        return redirect('survey:survey_item', activity_slug, item_index)
+
+        next_item = item.next()
+        if next_item:
+            new_item = items[next_item]
+            return redirect('/' + new_item.get_item_type_display() + '/' + activity_slug + '/' + str(next_item) + '/')
+        else:
+            return redirect('activity:summary', activity_slug)
+        # return redirect('survey:survey_item', activity_slug, item_index)
 
 
 

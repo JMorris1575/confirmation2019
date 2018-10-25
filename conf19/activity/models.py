@@ -100,7 +100,7 @@ class Item(models.Model):
     def next(self):
         """
         Returns the next item if there is one, otherwise returns None
-        :return: '/activity/<activity_slug>/<item_type>/<page_index>/ or None
+        :return: '/<item_type>/<activity_slug>/<item_type>/<page_index>/ or None
         """
         index = self.index
         slug = self.activity.slug
@@ -150,19 +150,19 @@ class Choice(models.Model):
 
 
 class TrueFalse(Item):
-    statement = models.CharField(max_length=512)
+    text = models.CharField(max_length=512)
     correct_answer = models.BooleanField(null=True, blank=True)
     true_count = models.PositiveIntegerField(default=0)
     false_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return self.statement
+        return self.text
 
     class Meta(Item.Meta):
         ordering = ['index']
 
     def get_text(self):
-        return self.statement
+        return self.text
 
     def get_subtext(self):
         return ['True or False']

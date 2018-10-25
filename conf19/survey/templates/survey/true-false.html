@@ -1,0 +1,13 @@
+{% extends parent_template|default:"activity/base-activity.html" %}
+
+{% block title %}
+    {{ block.super }}|Multi-Choice Response
+{% endblock %}
+
+{% block item-content %}
+    {% if not completed %}
+        <form action="{% url 'survey:survey_item' item.activity.slug item.index %}" method="post">
+            {% include 'activity/true-false.html' %}
+        </form>
+    {% endif %}
+{% endblock %}

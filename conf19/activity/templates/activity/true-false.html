@@ -1,0 +1,19 @@
+        {% csrf_token %}
+        {% if error_message %}
+            <h3 class="text-danger">{{ error_message }}</h3>
+        {% endif %}
+        <div class="form-check ml-3 ml-sm-5 my-4">
+            <h4>
+                <input class="form-check-input mt-2" type="radio" name="choice"
+                       value="true" id="radio_true">
+                <label class="form-check-label" for="radio_true">True</label>
+            </h4>
+            <h4>
+                <input class="form-check-input mt-2" type="radio" name="choice"
+                       value="false" id="radio_false">
+                <label class="form-check-label" for="radio_false">False</label>
+            </h4>
+        </div>
+        <div class=" row justify-content-center">
+            <input class="btn btn-outline-primary btn-lg" value="Submit Response" type="submit"/>
+        </div>
