@@ -71,15 +71,31 @@ class SurveyItemView(View):
                 context = {'activity':item.activity, 'item':item}
                 context['error_message'] = 'You must select either True or False.'
                 return render(request, self.template_name, context)
+            # make sure this user hasn't already responded to this item
+            if len(Completed.objects.filter(user=request.user, activity=activity, index=item_index)) == 0:
+                completed = Completed(user=request.user, activity=activity, index=item_index)
+                completed.save()
+                if item.privacy_type == 'AN':
+                    # only need to count the votes
+                    if selected_response == 'true':
+                        item.true_count += 1
+                    else:
+                        item.false_count += 1
+                    item.save()
+                else:
+                    response = Response(user=request.user, activity=activity,
+                                        index=item_index, true_false=selected_response=='true')
+                    response.save()
 
-
-        next_item = item.next()
-        if next_item:
-            new_item = items[next_item]
-            return redirect('/' + new_item.get_item_type_display() + '/' + activity_slug + '/' + str(next_item) + '/')
+        print('item_index = ', item_index)
+        next_item_index = item.next()
+        print('next_item_index = ', next_item_index)
+        if next_item_index:
+            print('items = ', items)
+            new_item = items[next_item_index - 1]
+            return redirect('/' + new_item.get_item_type_display() + '/' + activity_slug + '/' + str(next_item_index) + '/')
         else:
-            return redirect('activity:summary', activity_slug)
-        # return redirect('survey:survey_item', activity_slug, item_index)
+            return redirect('activity:welcome')
 
 
 
