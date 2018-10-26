@@ -4,6 +4,22 @@ from django.views import View
 
 from activity.models import Activity, MultiChoice, Choice, TrueFalse, Completed, Response, get_items
 
+def get_navigation_context(item, activity, context):
+    navigation_info = item.get_navigation_info()
+    previous_url = None
+    next_url = None
+    if navigation_info:
+        previous_info = navigation_info['previous_info']
+        if previous_info:
+            previous_url = '/' + previous_info['app_label'] + '/report/' + activity.slug + '/' + str(
+                previous_info['index'])
+        next_info = navigation_info['next_info']
+        if next_info:
+            next_url = '/' + next_info['app_label'] + '/report/' + activity.slug + '/' + str(next_info['index'])
+    context['previous_url'] = previous_url
+    context['next_url'] = next_url
+
+
 class SurveySummaryView(View):
     pass
 
@@ -103,18 +119,7 @@ class SurveyReportView(View):
         items = get_items(activity)
         item = items[item_index - 1]
         context = {'user':request.user, 'item':item}
-        navigation_info = item.get_navigation_info()
-        previous_url = None
-        next_url = None
-        if navigation_info:
-            previous_info = navigation_info['previous_info']
-            if previous_info:
-                previous_url = '/' + previous_info['app_label'] + '/report/' + activity.slug + '/' + str(previous_info['index'])
-            next_info = navigation_info['next_info']
-            if next_info:
-                next_url = '/' + next_info['app_label'] + '/report/' + activity.slug + '/' + str(next_info['index'])
-        context['previous_url'] = previous_url
-        context['next_url'] = next_url
+        get_navigation_context(item, activity, context)
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice-report.html'
             choices = item.choice_set.all()
