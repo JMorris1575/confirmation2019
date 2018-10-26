@@ -958,8 +958,14 @@ buttons.
 
 Last year I had a ``navigation.html`` page in the main sites set of templates. The ``href`` for both the Back and Next
 buttons needed the output of the ``Item.previous()`` and ``Item.next()`` methods to return an actual url. This year, so
-far, I have them returning the previous or next index. Changing that will affect the last part of the ``post()`` method
-of the ``SurveyItemView`` but I think it can be done.
+far, I have them returning an integer representing the previous or next index. Changing that will affect the last part
+of the ``post()`` method of the ``SurveyItemView`` but I think it can be done.
+
+Actually, it seems to be difficult to do. The ``Item.previous()`` and ``Item.next()`` functions don't have easy access
+to all of the items. Would a call to ``get_items()`` help?
+
+Yes, it will, but I still can't return just the url. It's going to be different for such things as reports. Instead I'll
+return a dictionary with the ``app_name`` and ``index`` and figure out how to use those in the template later.
 
 Creating a Working Menu System
 ------------------------------

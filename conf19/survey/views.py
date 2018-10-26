@@ -87,12 +87,13 @@ class SurveyItemView(View):
                                         index=item_index, true_false=selected_response=='true')
                     response.save()
 
-        next_item_index = item.next()
-        if next_item_index:
-            new_item = items[next_item_index - 1]
-            return redirect('/' + new_item.get_app_name_display() + '/' + activity_slug + '/' + str(next_item_index) + '/')
-        else:
-            return redirect('activity:welcome')
+        navigation_info = item.get_navigation_info()
+        if navigation_info:
+            next_item_info = navigation_info['next_info']
+            if next_item_info:
+                return redirect('/' + next_item_info['app_label'] + '/' +
+                                activity_slug + '/' + str(next_item_info['index']) + '/')
+        return redirect('activity:welcome')
 
 
 class SurveyReportView(View):
@@ -102,6 +103,18 @@ class SurveyReportView(View):
         items = get_items(activity)
         item = items[item_index - 1]
         context = {'user':request.user, 'item':item}
+        navigation_info = item.get_navigation_info()
+        previous_url = None
+        next_url = None
+        if navigation_info:
+            previous_info = navigation_info['previous_info']
+            if previous_info:
+                previous_url = '/' + previous_info['app_label'] + '/report/' + activity.slug + '/' + str(previous_info['index'])
+            next_info = navigation_info['next_info']
+            if next_info:
+                next_url = '/' + next_info['app_label'] + '/report/' + activity.slug + '/' + str(next_info['index'])
+        context['previous_url'] = previous_url
+        context['next_url'] = next_url
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice-report.html'
             choices = item.choice_set.all()

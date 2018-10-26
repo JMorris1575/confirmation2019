@@ -15,7 +15,6 @@ def get_items(activity):
         return x.index
 
     mc = activity.multichoice_set.all()
-    print('mc = ', mc)
     mc_list = list(mc)
     tf = activity.truefalse_set.all()
     tf_list = list(tf)
@@ -85,28 +84,62 @@ class Item(models.Model):
         abstract = True
         unique_together = ('activity', 'index')
 
+    def app_label(self):
+        return self.get_app_name_display()
+
     def previous(self):
         """
-        Returns the previous item index if there is one, otherwise returns None
+        Returns the previous item url if there is one, otherwise returns None
         :return: int or None
         """
-        index = self.index
+        index = self.index        # 1, for instance, if pointing to the first item in the list, item[0] that is
         if index == 1:
             return None
         else:
-            return index - 1
+            items = get_items(self.activity)
+            index -= 1              # now index will point to the current item in items
+            return {'app_label':items[index - 1].app_label(), 'index':index}    # callers expecting lowest index to be one
 
     def next(self):
         """
         Returns the next item index if there is one, otherwise returns None
         :return: int or None
         """
-        index = self.index
-        max = len(get_items(self.activity))
+        items = get_items(self.activity)
+        max = len(items)            # 3, for instance, in a list with three items
+        index = self.index          # 3, for instance, if pointing to the last item in a 3-item list, items[2] that is
         if index == max:
             return None
         else:
-            return index + 1
+            # index already points to next item in items
+            return {'app_label':items[index].app_label(), 'index':index + 1}    # callers expecting lowest index to be one
+
+    def get_navigation_info(self):
+        """
+        Returns a dictionary of dictionaries with the info for the previous and next items if available. If there is no
+        previous item, previous will be None. If there is no next item, next will be None. Returns None if there are no
+        items at all.
+        The "info" dictionaries are strucured as follows {'app_label':<app_label>, 'index':<new_index>}
+        :return: {'previous_info':<previous_info> or None, 'next_info':<next_info> or None} or None
+        """
+        items = get_items(self.activity)    # a zero-based list of items
+        max = len(items)
+        if max == 0:
+            return None                     # return None if there are no items
+        index = self.index                  # get the one-based index for this item
+        if index == 1:                      # if we are at the first item in the list
+            previous_info = None                # we cannot go to the previous item
+        else:
+            prev_index = index - 1          # get the one-based index of the previous item
+            previous_info = {'app_label':items[index-1].app_label(), 'index':prev_index}
+
+        if index == max:                    # if we are at the last item in the list
+            next_info = None                    # we cannot go to the next item
+        else:
+            next_index = index + 1          # get the one-based index to the next item
+            next_info = {'app_label':items[index-1].app_label(), 'index':next_index}
+
+        return {'previous_info':previous_info, 'next_info':next_info}
 
 
 class MultiChoice(Item):

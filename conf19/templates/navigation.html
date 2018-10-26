@@ -1,0 +1,19 @@
+<div class="row">
+    <p>
+        <div class="col-3">
+            {% if previous_url %}
+                <a class="btn btn-outline-primary col-2" href="{{ previous_url }}">Back</a>
+            {% endif %}
+        </div>
+        <div class="col-6">
+            <a class="btn btn-outline-primary" href="{% url 'activity:summary' item.activity.slug %}">
+                Summary Page
+            </a>
+        </div>
+        <div class="col-3">
+            {% if next_url %}
+                <a class="btn btn-outline-primary" href="{{ next_url }}">Next</a>
+            {% endif %}
+        </div>
+    </p>
+</div>
