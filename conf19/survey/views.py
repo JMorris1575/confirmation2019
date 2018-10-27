@@ -4,18 +4,26 @@ from django.views import View
 
 from activity.models import Activity, MultiChoice, Choice, TrueFalse, Completed, Response, get_items
 
-def get_navigation_context(item, activity, context):
+def get_navigation_context(item, activity, modifier, context):
+    """
+    Returns the urls for the previous and next pages
+    :param item: the item being displayed along with its app_name
+    :param activity: the activity the item belongs to with its slug
+    :param modifier: the third part of the url or an empty string ('report/' for instance, or '')
+    :param context: the context variable to be modified
+    :return: None, but the context variable now has two new fields 'previous_url' and 'next_url'
+    """
     navigation_info = item.get_navigation_info()
     previous_url = None
     next_url = None
     if navigation_info:
         previous_info = navigation_info['previous_info']
         if previous_info:
-            previous_url = '/' + previous_info['app_label'] + '/report/' + activity.slug + '/' + str(
+            previous_url = '/' + previous_info['app_label'] + '/' + modifier + activity.slug + '/' + str(
                 previous_info['index'])
         next_info = navigation_info['next_info']
         if next_info:
-            next_url = '/' + next_info['app_label'] + '/report/' + activity.slug + '/' + str(next_info['index'])
+            next_url = '/' + next_info['app_label'] + '/' + modifier + activity.slug + '/' + str(next_info['index'])
     context['previous_url'] = previous_url
     context['next_url'] = next_url
 
@@ -48,9 +56,11 @@ class SurveyItemView(View):
             choices = item.choice_set.all()
             context = {'user': request.user, 'completed': completed, 'response': response,
                        'item': item, 'choices': choices}
+            get_navigation_context(item, activity, '', context)
         elif type(item) == TrueFalse:
             self.template_name = 'survey/true-false.html'
             context = {'user': request.user, 'completed': completed, 'response': response, 'item': item}
+            get_navigation_context(item, activity, '', context)
 
         return render(request, self.template_name, context)
 
@@ -119,7 +129,7 @@ class SurveyReportView(View):
         items = get_items(activity)
         item = items[item_index - 1]
         context = {'user':request.user, 'item':item}
-        get_navigation_context(item, activity, context)
+        get_navigation_context(item, activity, 'report/', context)
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice-report.html'
             choices = item.choice_set.all()

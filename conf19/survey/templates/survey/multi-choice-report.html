@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block item-content %}
-    {% for choice in choices %}
-        <ul class="list-group ml-3 ml-sm-5 my-4">
+    <ul class="list-group ml-3 ml-sm-5 my-4">
+        {% for choice in choices %}
             <h4>
                 <li class="list-group-item">
                     <div class="mb-1">{{ choice }}</div>
@@ -17,8 +17,8 @@
                     </div>
                 </li>
             </h4>
-        </ul>
-    {% endfor %}
+        {% endfor %}
+    </ul>
     {% include 'navigation.html' %}
 
 {% endblock %}
