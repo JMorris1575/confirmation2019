@@ -10,29 +10,31 @@
             {% include 'activity/true-false.html' %}
         </form>
     {% else %}
-        {% if item.privacy_type == 'AN' %}
-            <h5 class="text-primary">
-                Your response was saved anonymously on {{ completed.created }}
-            </h5>
-        {% else %}
-            {% with response.true_false as true_false %}
-                <p>
-                    You answered {{ true_false }}
-                </p>
-                {% if item.reveal_answer %}
-                    {% if response.correct %}
-                        <p>That is correct!</p>
+        <div class="my-4">
+            {% if item.privacy_type == 'AN' %}
+                <h5 class="text-primary">
+                    Your response was saved anonymously on {{ completed.created }}
+                </h5>
+            {% else %}
+                {% with response.true_false as true_false %}
+                    <p>
+                        You answered {{ true_false }}
+                    </p>
+                    {% if item.reveal_answer %}
+                        {% if response.correct %}
+                            <p>That is correct!</p>
+                        {% else %}
+                            <p>Sorry! That is not correct.</p>
+                        {% endif %}
+                        {% if item.explanation != '' %}
+                            <p>{{ item.explanation }}</p>
+                        {% endif %}
                     {% else %}
-                        <p>Sorry! That is not correct.</p>
+                        {% include 'activity/edit-delete.html' %}
                     {% endif %}
-                    {% if item.explanation != '' %}
-                        <p>{{ item.explanation }}</p>
-                    {% endif %}
-                {% else %}
-                    {% include 'activity/edit-delete.html' %}
-                {% endif %}
-            {% endwith %}
-        {% endif %}
+                {% endwith %}
+            {% endif %}
+        </div>
     {% endif %}
     {% include 'navigation.html' %}
 {% endblock %}

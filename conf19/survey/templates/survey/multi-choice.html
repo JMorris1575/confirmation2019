@@ -10,30 +10,32 @@
             {% include 'activity/multi-choice.html' %}
         </form>
     {% else %}
-        {% if item.privacy_type == 'AN' %}
-            <h5 class="text-primary">
-                Your response was saved anonymously on {{ completed.created }}
-            </h5>
-        {% else %}
-            {% with response.multi_choice as multi_choice %}
-                <p>
-                    You answered {{ multi_choice }}
-                </p>
-                {% if item.reveal_answer %}
-                    {% if response.correct %}
-                        <p>That is correct!</p>
+        <div class="my-4">
+            {% if item.privacy_type == 'AN' %}
+                <h5 class="text-primary">
+                    Your response was saved anonymously on {{ completed.created }}
+                </h5>
+            {% else %}
+                {% with response.multi_choice as multi_choice %}
+                    <p class="my-4">
+                        You answered {{ multi_choice }}
+                    </p>
+                    {% if item.reveal_answer %}
+                        {% if response.correct %}
+                            <p>That is correct!</p>
+                        {% else %}
+                            <p>Sorry! That is not correct.</p>
+                            <p>The correct answer is: {{ multi_choice.correct_choice }}</p>
+                        {% endif %}
+                        {% if item.explanation != '' %}
+                            <p>{{ item.explanation }}</p>
+                        {% endif %}
                     {% else %}
-                        <p>Sorry! That is not correct.</p>
-                        <p>The correct answer is: {{ multi_choice.correct_choice }}</p>
+                        {% include 'activity/edit-delete.html' %}
                     {% endif %}
-                    {% if item.explanation != '' %}
-                        <p>{{ item.explanation }}</p>
-                    {% endif %}
-                {% else %}
-                    {% include 'activity/edit-delete.html' %}
-                {% endif %}
-            {% endwith %}
-        {% endif %}
+                {% endwith %}
+            {% endif %}
+        </div>
     {% endif %}
     {% include 'navigation.html' %}
 {% endblock %}
