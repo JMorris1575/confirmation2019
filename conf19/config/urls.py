@@ -23,5 +23,6 @@ urlpatterns = [
     path('polls/', include('polls.urls')),
     path('activity/', include('activity.urls')),
     path('survey/', include('survey.urls')),
+    path('help/', include('help.urls')),
     path('admin/', admin.site.urls),
 ]

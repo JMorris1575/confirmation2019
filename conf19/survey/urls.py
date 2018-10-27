@@ -1,6 +1,5 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
-from django.views.generic import RedirectView
 from .views import SurveySummaryView, SurveyDisplayView, SurveyItemView, SurveyReportView
 
 app_name = 'survey'

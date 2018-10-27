@@ -967,8 +967,134 @@ to all of the items. Would a call to ``get_items()`` help?
 Yes, it will, but I still can't return just the url. It's going to be different for such things as reports. Instead I'll
 return a dictionary with the ``app_name`` and ``index`` and figure out how to use those in the template later.
 
+What I finally ended up doing was to create a ``get_navigation_context`` method in the ``survey.views.py`` file as
+follows:
+
+``survey.views.py``::
+
+    def get_navigation_context(item, activity, modifier, context):
+        """
+        Returns the urls for the previous and next pages
+        :param item: the item being displayed along with its app_name
+        :param activity: the activity the item belongs to with its slug
+        :param modifier: the third part of the url or an empty string ('report/' for instance, or '')
+        :param context: the context variable to be modified
+        :return: None, but the context variable now has two new fields 'previous_url' and 'next_url'
+        """
+        navigation_info = item.get_navigation_info()
+        previous_url = None
+        next_url = None
+        if navigation_info:
+            previous_info = navigation_info['previous_info']
+            if previous_info:
+                previous_url = '/' + previous_info['app_label'] + '/' + modifier + activity.slug + '/' + str(
+                    previous_info['index'])
+            next_info = navigation_info['next_info']
+            if next_info:
+                next_url = '/' + next_info['app_label'] + '/' + modifier + activity.slug + '/' + str(next_info['index'])
+        context['previous_url'] = previous_url
+        context['next_url'] = next_url
+
+And then calling it in the actual views as follows::
+
+    class SurveyItemView(View):
+
+        def get(self, request, activity_slug, item_index):
+            activity = Activity.objects.get(slug=activity_slug)
+            items = get_items(activity)
+            item = items[item_index - 1]
+            try:
+                completed = Completed.objects.get(user=request.user, activity=activity, index=item.index)
+            except Completed.DoesNotExist:
+                completed = None
+            # responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
+            try:
+                response = Response.objects.get(user=request.user, activity=activity, index=item_index)
+            except Response.DoesNotExist:
+                response = None
+            if type(item) == MultiChoice:
+                self.template_name = 'survey/multi-choice.html'
+                choices = item.choice_set.all()
+                context = {'user': request.user, 'completed': completed, 'response': response,
+                           'item': item, 'choices': choices}
+                get_navigation_context(item, activity, '', context)
+            elif type(item) == TrueFalse:
+                self.template_name = 'survey/true-false.html'
+                context = {'user': request.user, 'completed': completed, 'response': response, 'item': item}
+                get_navigation_context(item, activity, '', context)
+
+            return render(request, self.template_name, context)
+
+
 Creating a Working Menu System
 ------------------------------
 
 Before I create a link to the report system I want to at least stub in the help system. For now I will just create an
 html page telling the user, sadly, that there isn't a help system yet.
+
+Here are some questions I need to answer:
+
+#. What should the url to the help system be?
+#. Should it have its own app?
+#. Should there be submenus under the help menu and, if so, how would that work when the menu is collapsed?
+#. If the Help menu does NOT have submenus, how is the user to go from one help section to the next?
+#. Can I use Sphinx to create the help files and then incorporate them, somehow, into the help system?
+
+Some of the later questions seem more important to answer first.
+
+If I can use Sphinx, as they do on https://docs.djangoproject.com/en/2.1/ , that would solve the submenu problem since
+all the navigation could take place within the help system itself. The downside is that the help system would not have
+the same look and feel as the main program.
+
+I need to study how submenus would work, if indeed they do, with the main menu collapsed...
+
+The first hit: https://stackoverflow.com/questions/44467377/bootstrap-4-multilevel-dropdown-inside-navigation seemed to
+be what I would want when I get around to doing it but it might be good to carefully think through the whole menu
+system before I try to implement it piecemeal.
+
+Thinking Through the Menu System
+********************************
+
+Last year's version had a total of four main menu items in the header:
+
++------------------+------------------------------------------------------------------------------------------------+
+|    menu name     | details                                                                                        |
++==================+================================================================================================+
+| Help             | Appeared for all users. Included the following dropdown submenus:                              |
+|                  |      **Finding Scriptures**: appeared to all, led to help/scripture/ page about finding Bible  |
+|                  |      passages                                                                                  |
+|                  |      **Team Pages**: appeared only to team members, went to a Not Ready page                   |
+|                  |      **Using the Website**: appeared to all, went to a help/index page leading to other pages  |
++------------------+------------------------------------------------------------------------------------------------+
+| Team Pages       | Appeared only to team members and above, included the following dropdown submenus:             |
+|                  |      **Build Activities**: went to a /develop/activities/ page which explained my plans for it |
+|                  |      **Candidate Reports**: went to an ``activity/reports/`` page saying it wasn't ready yet   |
++------------------+------------------------------------------------------------------------------------------------+
+| Toggle Critiques | Appeared to testers and above, didn't go anywhere, only toggled the appearance of the critiques|
+|                  | for those able to see them.                                                                    |
++------------------|------------------------------------------------------------------------------------------------+
+| E-mail           | Appeared only to leaders, I think, and went to a really cool e-mail page that allowed me to    |
+|                  | fairly easily select who would get the e-mail I could create on the page, complete with tags   |
+|                  | that would expand into the recipient's real name, username, and password.                      |
++------------------+------------------------------------------------------------------------------------------------+
+
+I don't need to have all of that yet this year. I think, for starters, maybe just a couple of main menu items **Help**
+and **Reports** with  the latter appearing only to the superuser, for now, and neither of them having submenus. I will
+create a separate ``help`` app to handle the help system yet to be developed, or copied from last year, as the case may
+be. For now it will just lead to a page that explains that there is not yet any help to be had. Then I will get to work
+on the **Reports** menu entry.
+
+Stubbing in the Help Page
+*************************
+
+I have to create entries in ``help/urls.py`` (a file which I need to create), ``help/views.py`` and create
+``help/templates/help/help-index.html`` in order to get it to work. I also need to put the ``help`` app into
+``INSTALLED_APPS`` and modify the main urlconf to include the help urls.
+
+Last years ``help/urls.py`` was broken in its first line which went::
+
+    path('', RedirectView.as_view(url='help/index/')),
+
+It sent anyone who entered "help" into the address line to a non-existing location: ``help/help/index.html``. I will fix
+that this year.
+

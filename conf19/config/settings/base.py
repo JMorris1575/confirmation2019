@@ -49,6 +49,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'activity.apps.ActivityConfig',
     'survey.apps.SurveyConfig',
+    'help.apps.HelpConfig',
     'polls.apps.PollsConfig',
     'user.apps.UserConfig',
     'django.contrib.admin',
