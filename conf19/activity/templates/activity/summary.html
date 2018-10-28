@@ -56,14 +56,16 @@
                                                 {% if progress == 'Pending' %}
                                                     ''
                                                 {% elif progress == 'Up next...' %}
-                                                    <a class="btn btn-outline-primary btn-lg btn-block py-1"
+                                                    <a class="btn btn-outline-primary btn-lg btn-block px-0 px-sm-16"
                                                        href="/{{ item.get_app_name_display }}/{{ activity.slug }}/{{ item.index }}/">
-                                                        Do it...
+                                                        <i class="d-none d-sm-inline">Do it...</i>
+                                                        <i class="d-sm-none d-inline fas fa-play"></i>
                                                     </a>
                                                 {% else %}
-                                                    <a class="btn btn-outline-primary btn-lg btn-block"
+                                                    <a class="btn btn-outline-primary btn-lg btn-block px-0 px-sm-16"
                                                        href="/{{ item.get_app_name_display }}/{{ activity.slug }}/{{ item.index }}/">
-                                                        See it...
+                                                        <i class="d-none d-sm-inline">See it...</i>
+                                                        <i class="d-sm-none d-inline far fa-eye"></i>
                                                     </a>
                                                 {% endif %}
                                             </div>
