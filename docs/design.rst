@@ -1098,3 +1098,159 @@ Last years ``help/urls.py`` was broken in its first line which went::
 It sent anyone who entered "help" into the address line to a non-existing location: ``help/help/index.html``. I will fix
 that this year.
 
+...
+
+I created the following ``help.urls.py`` file::
+
+    from django.urls import path
+    from django.contrib.auth.decorators import login_required
+    from django.views.generic import RedirectView
+    from .views import HelpView
+
+    app_name = 'help'
+
+    urlpatterns = [
+        path('', RedirectView.as_view(url='index/')),
+        path('index/', HelpView.as_view(), name='index'),
+    ]
+
+the following ``help.views.py`` file::
+
+    from django.shortcuts import render, redirect
+    from django.contrib.auth.models import User
+    from django.views import View
+
+
+    class HelpView(View):
+
+        def get(self, request):
+            self.template_name = 'help/help-index.html'
+            return render(request, self.template_name)
+
+and the following ``.html`` files:
+
+**base-help.html**::
+
+    {% extends parent_template|default:"base.html" %}
+    {% load static %}
+
+    {% block content %}
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <div class="card my-3 shadow p-3 bg-white rounded">
+                    <div class="card-header bg-primary text-center">
+                        <div class="row">
+                            <div class="col">
+                                <h1>Help</h1>
+                            </div>
+                            <div class="col-md-2 d-none d-md-inline">
+                                <img class="img-fluid w-50" src="{% static 'help/images/QuestionBoy.svg' %}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% block help-content %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+and **help-index.html**::
+
+    {% extends parent_template|default:"help/base-help.html" %}
+    {% load static %}
+
+    {% block title %}
+        {{ block.super }}|Help
+    {% endblock %}
+
+    {% block help-content %}
+        <div class="row">
+            <div class="col-1"></div>
+            <img class="col-5" src="{% static 'help/images/Sorry.png' %}" />
+            <h3 class="col-5">
+                Sorry, I'm not ready yet.
+            </h3>
+        </div>
+    {% endblock %}
+
+I updated ``Romanov-Boy-Question.svg`` to give him black hair and darker skin and a red question mark that would show up
+better against the green background.
+
+One thing I learned in the process of all this is that when creating the static folder for a new app one must restart
+the ``runserver`` program or it will not be recognized.
+
+But the bare beginning of a help system is in place.
+
+Thinking About the Reports Menu Item
+************************************
+
+The ``Reports`` menu item is clicked a team member ought to be able to see either the reports for the current activity
+or a version of the welcome page that will allow them to choose the activity they want to observe. It would be nice if
+team members could click ``Reports`` on any page they were on and get the appropriate response.
+
+I'm not sure how I would do that. It could involve just slipping ``report/`` into the url at the appropriate spot, but
+it also might require "remembering" that one arrived at a page AFTER the ``Reports`` menu item was clicked. For
+instance, if I was on the welcome page and clicked ``Reports`` I would stay on the welcome page but clicking on an
+activity button would take me to the reports for that activity. I think it would be better to create a
+``reports-index.html`` page from which to enter the reports for the various activities.
+
+On the Summary page, clicking on ``Reports`` should result in going to the report for the first item in the current
+activity.
+
+On any individual item page clicking on ``Reports`` really can just insert ``report/`` into the url and go to the
+report for that page.
+
+Also, the ``Reports`` menu item should only appear for team members or above.
+
+An Initial Implementation of the Reports Menu Item
+**************************************************
+
+At first I will just make it visible for a staff member by using ``{% if user.is_staff %}`` around the ``Reports``
+section in the ``header.html`` template. I can also make it appear only after an activity has been chosen by using this
+tag:  ``{% if user.is_staff and activity %}`` then the ``Reports`` menu item will appear only when the activity has
+been sent in the context. That means only for the summary page.
+
+I was able to do more than I originally thought by creating a new urlconf and a new view in ``activity.views.py``. I can
+get to the report on the first item from the summary page and get to the report for the current item from any of the
+display pages for that item. That part, however, doesn't make a lot of sense unless I also devise a means for staff
+members to view any item's display page without actually having to respond to that page. It works for me for now because
+I have entered a number of fake responses to the only activity that exists at the moment, the life issues survey.
+
+Here is the current state of ``activity.urls.py``::
+
+    app_name = 'activity'
+
+    urlpatterns = [
+        path('', RedirectView.as_view(url='/activity/welcome/')),
+        path('welcome/', login_required(WelcomeView.as_view()), name='welcome'),
+        path('<slug:activity_slug>/summary/', login_required(SummaryView.as_view()), name='summary'),
+        path('<slug:activity_slug>/display/', login_required(DisplayView.as_view()), name='display'),
+        path('report/<slug:activity_slug>/<int:item_index>/', login_required(report_view), name='report'),
+    ]
+
+And here is the new view::
+
+    def report_view(request, activity_slug, item_index):
+        activity = Activity.objects.get(slug=activity_slug)
+        item = get_items(activity)[item_index - 1]
+        app_label = item.app_label()
+        return redirect('/' + app_label + '/report/' + activity_slug + '/' + str(item_index) + '/')
+
+Finally, here is the current form of the html code for the ``Reports`` link::
+
+    {% if user.is_staff %}
+        <li class="nav-item">
+            {% if item %}
+                <a href="/activity/report/{{ item.activity.slug }}/{{ item.index }}/"
+                   class="nav-link">Reports</a>
+            {% elif activity %}
+                <a href="/activity/report/{{ activity.slug }}/1/"
+                   class="nav-link">Reports</a>
+            {% endif %}
+        </li>
+    {% endif %}
+
+

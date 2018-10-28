@@ -38,9 +38,17 @@
                                 </button>
                                 <div class="collapse navbar-collapse" id="navbarCollapse">
                                     <ul class="navbar-nav ml-auto text-right">
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link">Reports</a>
-                                        </li>
+                                        {% if user.is_staff %}
+                                            <li class="nav-item">
+                                                {% if item %}
+                                                    <a href="/activity/report/{{ item.activity.slug }}/{{ item.index }}/"
+                                                       class="nav-link">Reports</a>
+                                                {% elif activity %}
+                                                    <a href="/activity/report/{{ activity.slug }}/1/"
+                                                       class="nav-link">Reports</a>
+                                                {% endif %}
+                                            </li>
+                                        {% endif %}
                                         <li class="nav-item">
                                             <a href="{% url 'help:index' %}" class="nav-link pr-0">Help</a>
                                         </li>

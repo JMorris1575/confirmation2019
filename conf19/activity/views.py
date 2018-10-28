@@ -110,3 +110,10 @@ class ItemView(View):
                     response.correct = selected_choice.correct
                 response.save()
         return redirect('activity:item', activity_slug, item_index)
+
+
+def report_view(request, activity_slug, item_index):
+    activity = Activity.objects.get(slug=activity_slug)
+    item = get_items(activity)[item_index - 1]
+    app_label = item.app_label()
+    return redirect('/' + app_label + '/report/' + activity_slug + '/' + str(item_index) + '/')

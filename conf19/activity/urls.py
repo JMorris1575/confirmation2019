@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
 from django.views.generic import RedirectView
-from .views import WelcomeView, SummaryView, DisplayView, ItemView
+from .views import WelcomeView, SummaryView, DisplayView, ItemView, report_view
 
 app_name = 'activity'
 
@@ -10,4 +10,5 @@ urlpatterns = [
     path('welcome/', login_required(WelcomeView.as_view()), name='welcome'),
     path('<slug:activity_slug>/summary/', login_required(SummaryView.as_view()), name='summary'),
     path('<slug:activity_slug>/display/', login_required(DisplayView.as_view()), name='display'),
+    path('report/<slug:activity_slug>/<int:item_index>/', login_required(report_view), name='report'),
 ]
