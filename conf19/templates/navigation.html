@@ -1,7 +1,7 @@
-<div class="row">
+<div class="row border py-2 ">
     <div class="col-3 text-center">
         {% if previous_url %}
-            <a class="btn btn-outline-primary" href="{{ previous_url }}">Back</a>
+            <a class="btn btn-outline-primary" href="{{ previous_url }}">&lt</a>
         {% endif %}
     </div>
     <div class="col-6 text-center">
@@ -11,7 +11,7 @@
     </div>
     <div class="col-3 text-center">
         {% if next_url %}
-            <a class="btn btn-outline-primary" href="{{ next_url }}">Next</a>
+            <a class="btn btn-outline-primary" href="{{ next_url }}">&gt</a>
         {% endif %}
     </div>
 </div>

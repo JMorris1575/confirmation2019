@@ -19,18 +19,18 @@
                         <ul class="card-text pl-0">
                             {% for activity, msg in data %}
                                 <li class="row mx-0">
-                                    <div class="col-5 p-1">
+                                    <div class="col-7 col-sm-5 p-1">
                                         {{ forloop.counter }}. {{ activity }}
                                     </div>
-                                    <div class="col-4 p-1">
+                                    <div class="col-sm-4 d-none d-sm-inline p-1">
                                         {{ msg }}
                                     </div>
-                                    <div class="col-3 p-1">
+                                    <div class="col-5 col-sm-3 text-right p-1">
                                         <a class="btn btn-outline-primary btn-block" href="/activity/{{ activity.slug }}/summary/">
                                             {% if msg == '0.0% Complete' %}
                                                 Start
                                             {% elif msg == 'Finished!' %}
-                                                Done!
+                                                View
                                             {% else %}
                                                 Go On
                                              {% endif %}
