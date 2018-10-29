@@ -46,20 +46,19 @@ class SurveyItemView(View):
             completed = Completed.objects.get(user=request.user, activity=activity, index=item.index)
         except Completed.DoesNotExist:
             completed = None
-        # responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
-        try:
-            response = Response.objects.get(user=request.user, activity=activity, index=item_index)
-        except Response.DoesNotExist:
-            response = None
+        responses = Response.objects.filter(user=request.user, activity=activity, index=item_index)
+        if len(responses) == 1:         # discussions may have more than one response
+            response = responses[0]     # if there is only one response, remember it
+        else:
+            response = None             # otherwise set the response to None
+        context = {'user': request.user, 'completed': completed, 'response': response, 'item': item}
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice.html'
             choices = item.choice_set.all()
-            context = {'user': request.user, 'completed': completed, 'response': response,
-                       'item': item, 'choices': choices}
+            context['choices'] = choices
             get_navigation_context(item, activity, '', context)
         elif type(item) == TrueFalse:
             self.template_name = 'survey/true-false.html'
-            context = {'user': request.user, 'completed': completed, 'response': response, 'item': item}
             get_navigation_context(item, activity, '', context)
 
         return render(request, self.template_name, context)
@@ -128,7 +127,7 @@ class SurveyReportView(View):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
         item = items[item_index - 1]
-        context = {'user':request.user, 'item':item}
+        context = {'user':request.user, 'item':item, }
         get_navigation_context(item, activity, 'report/', context)
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice-report.html'

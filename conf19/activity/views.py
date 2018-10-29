@@ -79,6 +79,7 @@ class ItemView(View):
             choices = item.choice_set.all()
             context = {'user': request.user, 'response': response, 'item': item, 'choices': choices}
 
+        print('type(item) = ', type(item))
         return render(request, self.template_name, context)
 
     def post(self, request, activity_slug, item_index):
@@ -116,4 +117,7 @@ def report_view(request, activity_slug, item_index):
     activity = Activity.objects.get(slug=activity_slug)
     item = get_items(activity)[item_index - 1]
     app_label = item.app_label()
-    return redirect('/' + app_label + '/report/' + activity_slug + '/' + str(item_index) + '/')
+    if request.user.is_staff:               # only staff can see reports, others get sent back to regular page
+        return redirect('/' + app_label + '/report/' + activity_slug + '/' + str(item_index) + '/')
+    else:
+        return redirect('/' + app_label + '/' + activity_slug + '/' + str(item_index) + '/')
