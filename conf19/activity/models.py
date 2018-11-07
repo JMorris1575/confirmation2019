@@ -141,6 +141,24 @@ class Item(models.Model):
 
         return {'previous_info':previous_info, 'next_info':next_info}
 
+    def allowed(self, user, items, item_index):
+        """
+        Returns True if the user is allowed to go to the page at /activity/<activity_slug>/<item_index>, having
+        completed all of the items before this one
+        :return: boolean
+        """
+        if self.index == 1:
+            return True             # user is always allowed to go to the first page
+        else:
+            result = True
+            for item in items:      # check every item before the current one to be sure it's completed
+                if item.index < item_index:
+                    completed = Completed.objects.filter(user=user, activity=self.activity, index=item.index)
+                    if len(completed) == 0:
+                        result = False
+                        break
+            return result
+
 
 class MultiChoice(Item):
     text = models.CharField(max_length=512)

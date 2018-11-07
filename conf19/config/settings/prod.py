@@ -17,11 +17,11 @@ DATABASES = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.01/howto/static-files/
 
-STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'conftest_static/')
-STATIC_URL = 'https://conftest.jmorris.webfactional.com/static/'
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'conf19_static/')
+STATIC_URL = 'https://confirmation.jmorris.webfactional.com/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static', 'site'), )
 
-ALLOWED_HOSTS.append('conftest.jmorris.webfactional.com')
+ALLOWED_HOSTS.append('confirmation.jmorris.webfactional.com')
 
 ADMINS = (
     ('FrJim', 'jmorris@ecybermind.net'), ('FrJim', 'frjamesmorris@gmail.com')

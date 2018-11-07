@@ -24,7 +24,7 @@
                                 <li class="row">
                                     <div class="d-flex h-100 w-100 align-items-center">
                                         {% if progress == 'Pending' %}
-                                            <div class="col-8">
+                                            <div class="col-8 text-title">
                                                 <h4>
                                                     <i class="far fa-square"> </i>
                                                     {% if item.title %}
@@ -38,7 +38,7 @@
                                                 <p class="text-center"></p>
                                             </div>
                                         {% else %}
-                                            <div class="col-8">
+                                            <div class="col-8 text-title">
                                                 <h4>
                                                     {% if progress == 'Up next...' %}
                                                         <i class="far fa-edit"> </i>
@@ -77,8 +77,8 @@
                         </ul>
                     {% endif %}
                     <div class=" row justify-content-center">
-                        <a class="btn btn-primary btn-lg" href="/activity/welcome/">
-                            Return to Welcome Page
+                        <a class="btn btn-outline-primary btn-lg" href="/activity/welcome/">
+                            Welcome Page
                         </a>
                     </div>
                 </div> <!-- end card-body -->

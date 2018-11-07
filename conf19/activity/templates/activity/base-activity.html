@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title text-primary">
+                    <h3 class="card-title text-title">
                         {% if item.title %}
                             {{ item.title }}
                         {% else %}
@@ -24,7 +24,7 @@
                         {% endif %}
                     </h3>
                     <hr class="my-3">
-                    <h3 class="card-text">
+                    <h3 class="card-text text-primary">
                         {{ item.text }}
                     </h3>
                     {% block item-content %}

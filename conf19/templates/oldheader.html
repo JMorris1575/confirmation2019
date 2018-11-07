@@ -5,7 +5,7 @@
     <header>
         <div class="container">
             <div class="row">
-                <div class="col-md-2 d-none d-md-inline logo">
+                <div class="col-md-2 d-none d-md-inline">
                     <a href="{% url 'activity:welcome' %}" class="brand">
                         <img src="{% static 'images/HolySpiritLogo.png' %}" class="img-fluid">
                     </a>
@@ -29,7 +29,7 @@
                             {% endif %}
                         </div>
                         <div class="col">
-                            <nav class="navbar navbar-light navbar-expand-md">
+                            <nav class="navbar navbar-dark navbar-expand-md">
                                 <button class="navbar-toggler ml-auto px-0" type="button"
                                         data-toggle="collapse" data-target="#navbarCollapse">
                                     <span class="navbar-toggler-icon pt-1" style="background:none">
@@ -60,7 +60,6 @@
                 </div>
             </div>
         </div>
-        <hline class=""></hline>
     </header>
 
 {% endblock %}

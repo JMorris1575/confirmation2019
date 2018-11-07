@@ -6,11 +6,11 @@
     </div>
     <div class="col-6 text-center">
         <a class="btn btn-outline-primary" href="{% url 'activity:summary' item.activity.slug %}">
-            Summary Page
+            Summary
         </a>
     </div>
     <div class="col-3 text-center">
-        {% if next_url%}
+        {% if next_url and completed %}
             <a class="btn btn-outline-primary" href="{{ next_url }}">&gt</a>
         {% endif %}
     </div>

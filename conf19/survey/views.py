@@ -41,7 +41,9 @@ class SurveyItemView(View):
     def get(self, request, activity_slug, item_index):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
-        item = items[item_index - 1]
+        item = items[item_index - 1]    # get the item associated with item_index
+        if not item.allowed(request.user, items, item_index):
+            return redirect('activity:summary', activity_slug)
         try:
             completed = Completed.objects.get(user=request.user, activity=activity, index=item.index)
         except Completed.DoesNotExist:
@@ -127,7 +129,7 @@ class SurveyReportView(View):
         activity = Activity.objects.get(slug=activity_slug)
         items = get_items(activity)
         item = items[item_index - 1]
-        context = {'user':request.user, 'item':item, }
+        context = {'user':request.user, 'item':item, 'completed':True}      # completed is used by navigation.html
         get_navigation_context(item, activity, 'report/', context)
         if type(item) == MultiChoice:
             self.template_name = 'survey/multi-choice-report.html'

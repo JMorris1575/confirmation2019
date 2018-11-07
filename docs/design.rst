@@ -875,8 +875,8 @@ I do think I need some different names for things, though. The fieldname ``item_
 refer to the various model types, such as MultiChoice and TrueFalse. I think ``item_app`` makes a better name, or just
 ``app``.
 
-Similarly, it doesn't seem necessary to have the survey urlconfs named with a prefix of ```` when they will need
-to be referred to as ``survey.<urlconf_name>`` or ``survey:<urlconf_name``.
+Similarly, it doesn't seem necessary to have the survey urlconfs named with a prefix of ``survey_`` when they will need
+to be referred to as ``survey.<urlconf_name>`` or ``survey:<urlconf_name>``.
 
 Finally, my yet-to-be-created ``action`` app needs a better name. The purpose of the items in this app are to kind of
 take place of a classroom instructional experience. Or maybe it's more like homework. The candidates come in, do
@@ -1072,7 +1072,7 @@ Last year's version had a total of four main menu items in the header:
 +------------------+------------------------------------------------------------------------------------------------+
 | Toggle Critiques | Appeared to testers and above, didn't go anywhere, only toggled the appearance of the critiques|
 |                  | for those able to see them.                                                                    |
-+------------------|------------------------------------------------------------------------------------------------+
++------------------+------------------------------------------------------------------------------------------------+
 | E-mail           | Appeared only to leaders, I think, and went to a really cool e-mail page that allowed me to    |
 |                  | fairly easily select who would get the e-mail I could create on the page, complete with tags   |
 |                  | that would expand into the recipient's real name, username, and password.                      |
@@ -1252,5 +1252,81 @@ Finally, here is the current form of the html code for the ``Reports`` link::
             {% endif %}
         </li>
     {% endif %}
+
+Problem with Navigation
+-----------------------
+
+I just noticed a problem with the navigation buttons. When a user is taking a survey the next button appears at the
+bottom of each question and allows the user to move on without answering the question. Ideally, the next button would
+not appear when the user is not allowed to enter the next page. Meanwhile, if the user simply enters the url for a
+later page than he or she has completed, it should not be allowed. I would prefer that the user be directed back to
+the current page with some appropriate error message rather than getting a "Forbidden" page. How do I implement this?
+
+The view class would be responsible for preventing entry to pages whose url has been typed in but it seems the
+``navigation.html`` file needs to be able to figure it out too in order to decided whether to print the next button or
+not. Of course, the ``navigation.html`` gets its information from the view so maybe all of the responsibility belongs
+to the view -- which is already responsible for sending an error message if one is to be displayed.
+
+What I Did Last Year
+********************
+
+Last year I had an ``allowed`` method in the ``Page`` model that returned True or False as to whether the user was
+allowed to go to the next page. This method was called by the view's ``get`` method using the user and page information,
+including the page being requessted, from the request itself. If the ``allowed`` method returned False, the user was
+sent back to the Summary page.
+
+The ``navigation.html`` file last year checked a ``can_goto_next`` method in the Response model which returned the
+contents of the ``completed`` field. But, it seems to me, if the response item existed at all it would be marked as
+completed I don't know how this worked exactly. I think I may have been lucky. If there was no response the
+``response.can_goto_next`` in the template would return ``False`` even without actually calling the ``can_goto_next``
+method.
+
+Fixing the Problem
+******************
+
+In the View
+^^^^^^^^^^^
+
+I can create an ``allowed`` method in the ``Item`` abstract model as last year. That should not be a big problem.
+
+Oops! Since ``Item`` is an abstract model, and the ``allowed`` method used last year was in the ``Page`` model which was
+NOT abstract, it can't work the same way. The former ``allowed`` method included the line
+``items = Items.objects.filter(activity=activity)`` but, as Django kindly informed me,
+``type object 'Item' has no attribute 'objects'``. Only models that inherit from ``Item`` actually exist. How can I get
+a list of items associated with a particular activity?
+
+Ah! The solution is to use the already existing ``get_items`` function in ``activity.models.py``. That gives me an
+ordered Query set just as I want.
+
+Actually, I didn't have to use it since the view gets the list of items before the call to ``item.allowed``. Now it is
+working as it is supposed to .
+
+In ``navigation.html``
+^^^^^^^^^^^^^^^^^^^^^^
+
+I will have to think through how to handle it in ``navigation.html``. Do I need to put a new method in the ``Completed``
+model or is there someplace else that would work better? What ``navigation.html`` "knows" is the item that is being
+displayed with it. Does it also know the user? I will experiment to find out.
+
+By putting various things between double curly braces, such as ``{{ user }}``, ``{{ item }}`` and, most especially,
+``{{ completed }}``, all of which are supplied by the view when the template is called that includes
+``navigation.html``, I learned that all are available to ``navigation.html`` but the most useful would be
+``{{ completed }}`` which is ``None`` if an item has not been completed and filled with something otherwise. I think I
+can use that with a simple ``{% if completed %}`` statement in ``navigation.html`` that must be true if the next button
+is to be available.
+
+That worked!! Except that the actual statement just expanded an existing conditional statement. Now it says:
+``{% if next_url and completed %}`` and it prevents the next button from showing up unless the current item has been
+completed.
+
+Another Problem Discovered
+**************************
+
+While fixing the above I noticed that anyone trying to view the reports, who would likely be staff, were not allowed to
+see reports for any page they had not yet completed. I fixed it by going to the
+``SurveyReportView`` and inserting a ``context`` item as follows: ``'completed':True``. Thus anyone who can see reports
+at all will be able to see all of the reports whether or not they have completed the survey themselves. It remains to be
+seen how this may work out with other types of activities.
+
 
 
