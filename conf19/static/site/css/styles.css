@@ -6780,3 +6780,104 @@ a.text-dark:hover, a.text-dark:focus {
   .table .thead-dark th {
     color: inherit;
     border-color: #dee2e6; } }
+header, footer {
+  background: #d40000;
+  color: #ffdd55; }
+
+header a {
+  color: rgba(255, 221, 85, 0.8) !important;
+  text-decoration: none; }
+
+header a:hover {
+  color: #ffdd55 !important;
+  text-decoration: none;
+  font-weight: bold; }
+
+header img {
+  vertical-align: top;
+  opacity: 0.8; }
+
+header img:hover {
+  opacity: 1.0; }
+
+header ul {
+  justify-content: flex-end; }
+
+header button span {
+  border: 1px solid #ffdd55;
+  border-radius: 5px; }
+
+.logo {
+  background: #d40000; }
+
+.jumbotron {
+  background-color: #d40000;
+  color: #ffdd55; }
+
+.jumbotron hr {
+  border-color: #ffdd55; }
+
+.bg-primary, .btn-primary {
+  background: #b06b4a !important;
+  color: #fff;
+  border-color: #b06b4a !important; }
+
+.btn-primary:hover {
+  background: #784a45 !important;
+  color: #fff;
+  border-color: #b06b4a !important; }
+
+.btn-primary.focus, .btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(65, 105, 225, 0.5) !important; }
+
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled) .active,
+.btn-primary:not(:disabled):not(.disabled) .active .focus {
+  background: #ebc363 !important;
+  border-color: #b06b4a !important; }
+
+.btn-outline-primary {
+  background: #fff;
+  border-color: #b06b4a;
+  color: #b06b4a; }
+
+.btn-outline-primary:hover {
+  background: #b06b4a;
+  color: #fff;
+  border-color: #b06b4a; }
+
+.btn-outline-primary.focus, .btn-outline-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(65, 105, 225, 0.5); }
+
+.btn-outline-primary:not(:disabled):not(.disabled):active,
+.btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+.btn-outline-primary:not(:disabled):not(.disabled).active
+.btn-outline-primary:not(:disabled):not(.disabled).active:focus {
+  background: #b06b4a !important;
+  border-color: #b06b4a !important; }
+
+.card {
+  background: #fffefe; }
+
+.header-text {
+  font-family: 'Gloria Hallelujah', cursive; }
+
+.navbar-light .navbar-toggler {
+  color: rgba(255, 253, 85, 0.5);
+  border: none; }
+
+.lead {
+  font-weight: 400; }
+
+.text-title {
+  color: #b06b4a !important; }
+
+.text-primary {
+  color: #784a45 !important; }
+
+.progress-bar {
+  background-color: #d4a164; }
+
+.background-white {
+  background-color: white; }

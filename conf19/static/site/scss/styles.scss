@@ -1,0 +1,140 @@
+@import 'custom.scss';
+
+$primary-text: #784a45;
+$secondary-text: #b06b4a;
+$highlight-text: #d4a164;
+$dark-bg: #ebc363;
+$light-bg: #fffefe;
+
+
+header, footer {
+    background: $primary;
+    color: $secondary;
+}
+
+header a {
+    color: rgba(255, 221, 85, 0.8) !important;
+    text-decoration: none;
+}
+
+header a:hover {
+    color: rgba(255, 221, 85, 1.0) !important;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+header img {
+    vertical-align: top;
+    opacity: 0.8;
+}
+
+header img:hover {
+    opacity: 1.0;
+}
+
+// header li span {
+//     color: #4169e1;
+// }
+
+header ul {
+    justify-content: flex-end;
+}
+
+header button span {
+    border: 1px solid $secondary;
+    border-radius: 5px;
+}
+
+.logo {
+    background: $primary;
+}
+
+.jumbotron {
+    background-color: $primary;
+    color: $secondary;
+}
+
+.jumbotron hr {
+    border-color: $secondary;
+}
+
+.bg-primary, .btn-primary {
+    background: $secondary-text !important;
+    color: #fff;
+    border-color: $secondary-text !important;
+}
+
+.btn-primary:hover {
+    background: $primary-text !important;
+    color: #fff;
+    border-color: $secondary-text !important;
+}
+
+.btn-primary.focus, .btn-primary:focus {
+    box-shadow: 0 0 0 .2rem rgba(65, 105, 225, 0.5) !important;
+}
+
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled) .active,
+ .btn-primary:not(:disabled):not(.disabled) .active .focus{
+    background: $dark-bg !important;
+    border-color: $secondary-text !important;
+}
+
+.btn-outline-primary {
+    background: #fff;
+    border-color: $secondary-text;
+    color: $secondary-text;
+}
+
+.btn-outline-primary:hover {
+    background: $secondary-text;
+    color: #fff;
+    border-color: $secondary-text;
+}
+
+.btn-outline-primary.focus, .btn-outline-primary:focus {
+    box-shadow: 0 0 0 .2rem rgba(65, 105, 225, 0.5);
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active,
+ .btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+ .btn-outline-primary:not(:disabled):not(.disabled).active
+ .btn-outline-primary:not(:disabled):not(.disabled).active:focus{
+    background: $secondary-text !important;
+    border-color: $secondary-text !important;
+}
+
+.card {
+    background: $light-bg;
+}
+
+.header-text {
+    font-family: 'Gloria Hallelujah', cursive;
+}
+
+.navbar-light .navbar-toggler {
+    color: rgba(255, 253, 85, .5);
+    border: none;
+}
+
+.lead {
+    font-weight: 400;
+}
+
+.text-title {
+    color: $secondary-text !important;
+}
+
+.text-primary {
+    color: $primary-text !important;
+}
+
+.progress-bar {
+    background-color: $highlight-text;
+}
+
+.background-white {
+    background-color: white;
+}
